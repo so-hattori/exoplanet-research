@@ -17,7 +17,7 @@ filename = raw_input('Input FITS file to use: ')
 
 FITSfile = pyfits.open(filename)
 
-FITSfile.info()
+#FITSfile.info()
 
 dataheader = FITSfile[1].header
 topheader = FITSfile[0].header
