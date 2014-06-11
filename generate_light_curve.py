@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 #and change the working directory to the proper one. (Given that the proper local data exists)
 
 kplr_id = raw_input('Input kepler id:')
-#Hardcode for now
-#kplr_id = '012506954'
 path = '/Users/SHattori/.kplr/data/lightcurves/%s' %kplr_id
 os.chdir(path)
 
@@ -17,8 +15,6 @@ os.chdir(path)
 #Code to allow the user to decide which FIT format file to generate light curve.
 filename = raw_input('Input FITS file to use: ')
 
-#Hardcode for now
-#filename = 'kplr012506954-2009166043257_llc.fits'
 FITSfile = pyfits.open(filename)
 
 FITSfile.info()
