@@ -23,7 +23,7 @@ obsobject = str(dataheader["OBJECT"])
 lightdata = FITSfile[1].data
 
 #Allows the user to choose between PDCSAP or SAP to generate light curve.
-flux_type = '2'
+flux_type = '1'
 # flux_type = raw_input('PDCSAP[1], SAP[2]:' )
 flux = 0
 if flux_type == '1':
@@ -32,7 +32,12 @@ elif flux_type == '2':
 	flux = lightdata.field('SAP_FLUX')
 
 #time array contains NaN values
-# time = lightdata.field("TIME")            #Barycenter corrected Julian date
+time = lightdata.field("TIME")            #Barycenter corrected Julian date
+first, last = time[0], time[-1]
+#This was done so that there are no NaN values in the time-domain array.
+#The length variable should be inserted instead of 44100 being hard-coded.
+period_time = np.linspace(first, last, 44100) - first
+# print period_time[4920], period_time[4939], period_time[4960]
 
 #clean the data and obtain moving average
 clean_flux = f.nan_to_median(flux)
@@ -44,37 +49,61 @@ clean_flux = f.convert_to_relative(clean_flux)
 
 #dimension of the flux array that must be the same with the model
 length = clean_flux.shape[0]
-print length
+# print length
+
 #define arguments for the box_model
 phase = np.arange(0, 2530)
 depth = 0.009
 width = np.arange(0, 270)
 
-p_interval = np.arange(4935,4945)
+#This part of the code contains the main functionality.
+p_interval = np.arange(4900,5500)
 chi_squared_list = []
+#Set up a dictionary to assign the selected period to the appropriate chi-squared.
+chi_dict = {}
 for element in p_interval:
 	period = np.arange(0, element)
 	box_y = f.box(period, phase, depth, width, length)
 	calc_chi_squared = f.sum_chi_squared(clean_flux, box_y)
 	chi_squared_list.append(calc_chi_squared)
-plt.plot(p_interval, chi_squared_list, color = 'black', marker = '.', markersize = 10)
-# plt.xlim(p_interval[0], p_interval[-1])
-plt.ticklabel_format(useOffset = False)
-plt.show()
-# fig1 = plt.figure()
-# sub1 = fig1.add_subplot(111)
-# sub1.plot(flux, color="black", marker=",", linestyle = 'None')
-# sub1.plot(box_y, color="blue", marker=",")
+	chi_dict[calc_chi_squared] = element
 
-# #The following code is to set the labels and title
-# # xlab = "Time (days, Kepler Barycentric Julian date - %s)"%jdadj
+#return the lowest value and also the corresponding period.
+chi_value_list = chi_dict.keys()
+best_fit_period = chi_dict[min(chi_value_list)]
+# print best_fit_period
+print period_time[best_fit_period]
+
+#The following code will convert the p_interval array into 
+#the actual period in days.
+period_in_days = []
+for i in p_interval:
+	period_in_days.append(period_time[i])
+
+
+fig1 = plt.figure()
+sub1 = fig1.add_subplot(211)
+sub1.plot(time, clean_flux, color="black", marker=",", linestyle = 'None')
+sub1.plot(time, f.box(np.arange(0, best_fit_period), phase, depth, width, length), color="blue", marker=",")
+
+#The following code is to set the labels and title
+xlab = "Time (days, Kepler Barycentric Julian date - %s)"%jdadj
 # xlab = 'No Proper Units'
-# sub1.set_xlabel(xlab)
-# sub1.set_ylabel("Relative Brightness (electron flux)")
-# plottitle="Light Curve for %s"%obsobject
-# sub1.set_title(plottitle)
+sub1.set_xlabel(xlab)
+sub1.set_ylabel("Relative Brightness (electron flux)")
+plottitle="Light Curve for %s"%obsobject
+sub1.set_title(plottitle)
 
-# plt.show()
+sub2 = fig1.add_subplot(212)
+sub2.plot(period_in_days, chi_squared_list, color = 'black', marker = '.', markersize = 10)
+sub2.ticklabel_format(useOffset = False)
+xlab2 = 'Period (days)'
+sub2.set_xlabel(xlab2)
+ylab = r'$\chi^2$'
+sub2.set_ylabel(ylab)
+
+
+plt.show()
 
 
 
