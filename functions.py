@@ -1,10 +1,26 @@
 #File to contain the functions used in other files.
 
 import numpy as np
+import os
+import pyfits
+
+#function to open the FITS format file given kepler id and filename.
+def openfile(kplr_id, kplr_file):
+	path = '/Users/SHattori/.kplr/data/lightcurves/%s' %kplr_id
+	os.chdir(path)
+
+	FITSfile = pyfits.open(kplr_file)
+	dataheader = FITSfile[1].header
+	topheader = FITSfile[0].header
+	jdadj = str(dataheader['BJDREFI']) # the part that needs to be subtracted for julian date
+	obsobject = str(dataheader['OBJECT']) # the ID of the observed object
+	lightdata = FITSfile[1].data #the part of the FITS file where all the data is stored.
+	FITSfile.close()
+	
+	return jdadj, obsobject, lightdata
 
 #The following function will smoothen a graph by setting each point to
 #the value obtained by generating a box around the point and calculating its average.
-
 #array must be given with float elements at this point.
 #box_half_width will determine the size of the box.
 def marginalize(array, box_half_width):

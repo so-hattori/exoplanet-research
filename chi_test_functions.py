@@ -7,20 +7,13 @@ import functions as f
 
 kplr_id = '008191672'
 # kplr_id = raw_input('Input kepler id:')
-path = '/Users/SHattori/.kplr/data/lightcurves/%s' %kplr_id
-os.chdir(path)
 
-#Code to allow the user to decide which FITS format file to generate light curve.
+# Code to allow the user to decide which FITS format file to generate light curve.
 # filename = raw_input('Input FITS file to use: ')
-filename = 'kplr008191672-2009322144938_slc.fits'
+kplr_file = 'kplr008191672-2009322144938_slc.fits'
 
-FITSfile = pyfits.open(filename)
-dataheader = FITSfile[1].header
-topheader = FITSfile[0].header
-jdadj = str(dataheader["BJDREFI"])
-obsobject = str(dataheader["OBJECT"])
-
-lightdata = FITSfile[1].data
+#Given the kplr ID and filename, open the FITS file and extract the data.
+jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
 
 #Allows the user to choose between PDCSAP or SAP to generate light curve.
 flux_type = '1'
@@ -51,7 +44,7 @@ phase_chi_value_list = []
 depth_chi_value_list = []
 width_chi_value_list = []
 
-period_interval = np.arange(4900, 5000)
+period_interval = np.arange(4935, 4945)
 phase_interval = np.arange(2400, 2800)
 depth_interval = np.arange(-0.020, 0.020, 0.001)
 width_interval = np.arange(250, 500)
@@ -85,7 +78,7 @@ elif choose_parameter == '2':
 	for i in phase_interval:
 		x_tick.append(period_time[i])
 	xlab2 = 'Phase (days)'
-	
+
 elif choose_parameter == '3':
 	#Depth
 	depth_chi_dict = f.depth_search(depth_chi_value_list, depth_interval, period, phase, width, length, clean_flux)
@@ -96,6 +89,7 @@ elif choose_parameter == '3':
 	for i in depth_interval:
 		x_tick.append(i)
 	xlab2 = 'Depth (unitless)'
+
 elif choose_parameter == '4':
 	#Width
 	width_chi_dict = f.width_search(width_chi_value_list, width_interval, period, phase, depth, length, clean_flux)
@@ -145,7 +139,3 @@ sub2.set_title(title)
 
 
 plt.show()
-
-
-
-FITSfile.close()
