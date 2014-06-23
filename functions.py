@@ -99,6 +99,11 @@ def box(period, phase, depth, width, length):
 
 #returns the sum of the chi_squared values
 def sum_chi_squared(data_array, model_array):
+	# data_array = np.array(data_array)
+	# model_array = np.array(model_array)
+	# chi_squared = data_array - model_array
+	# return chi_squared.sum()
+	# return np.sum(chi_squared)
 	end_result = 0
 	chi_squared = 0
 	for i, e in enumerate(data_array):
