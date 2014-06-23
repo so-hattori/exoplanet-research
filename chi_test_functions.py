@@ -30,11 +30,11 @@ first, last = time[0], time[-1]
 clean_flux = f.nan_to_median(flux)
 clean_flux = f.convert_to_relative(clean_flux)
 length = clean_flux.shape[0]
-period_time = np.linspace(first, last, 44100) - first
+period_time = np.linspace(first, last, length) - first
 
 #define arguments for the box_model
-period = np.arange(0, 4935)
-phase = np.arange(0, 2521)
+period = np.arange(0, 4940)
+phase = np.arange(0, 2550)
 depth = 0.006
 width = np.arange(0, 270)
 
@@ -45,7 +45,7 @@ depth_chi_value_list = []
 width_chi_value_list = []
 
 period_interval = np.arange(4935, 4945)
-phase_interval = np.arange(2400, 2800)
+phase_interval = np.arange(2505, 2545)
 depth_interval = np.arange(-0.020, 0.020, 0.001)
 width_interval = np.arange(250, 500)
 
