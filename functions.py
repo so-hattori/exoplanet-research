@@ -76,17 +76,27 @@ def check(array):
 		return 'no NaN'
 
 #box model
+#period, phase are arrays from 0 to the number of
+#the data point you want to generate the model.
+#depth is an integer.
+#width, length are arrays from 0 to the number of the data point.
 def box(period, phase, depth, width, length):
 	#test with a list instead of an numpy array first
 	y_list = []
 	fixed_y = 0.0
 	#insert the phase part of the graph.
+	#the larger the phase array, the larger the phase part
+	#of the model will be.
 	for elements in phase:
 		y_list.append(fixed_y)
+
 	#create a variable to keep the loop running for now
+	#Create a loop to add the width part and then the period part of the model.
 	run = True
 	while run:
 		for elements in width:
+			#all points in the transit are currently fixed at a value.
+			#this may be a problem afterwards.
 			y_list.append(fixed_y - depth)
 		for elements in period:
 			y_list.append(fixed_y)
@@ -99,17 +109,17 @@ def box(period, phase, depth, width, length):
 
 #returns the sum of the chi_squared values
 def sum_chi_squared(data_array, model_array):
-	# data_array = np.array(data_array)
-	# model_array = np.array(model_array)
-	# chi_squared = data_array - model_array
-	# return chi_squared.sum()
-	# return np.sum(chi_squared)
-	end_result = 0
-	chi_squared = 0
-	for i, e in enumerate(data_array):
-		chi_squared = (data_array[i] - model_array[i])**2
-		end_result += chi_squared
-	return end_result
+	data_array = np.array(data_array)
+	model_array = np.array(model_array)
+	chi2_array = (data_array - model_array)**2
+	return np.sum(chi2_array)
+	# end_result = 0
+	# chi_squared = 0
+	# for i, e in enumerate(data_array):
+	# 	chi_squared = (data_array[i] - model_array[i])**2
+	# 	end_result += chi_squared
+	# return end_result
+
 
 #Iterate through and creates a dictionary that assigns the period(in data points) 
 #to the appropriate chi-squared value

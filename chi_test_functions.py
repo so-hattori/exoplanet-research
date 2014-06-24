@@ -5,6 +5,9 @@ import numpy as np
 #functions is another python file
 import functions as f
 
+import time as t
+t0 = t.clock()
+
 kplr_id = '008191672'
 # kplr_id = raw_input('Input kepler id:')
 
@@ -33,10 +36,10 @@ length = clean_flux.shape[0]
 period_time = np.linspace(first, last, length) - first
 
 #define arguments for the box_model
-period = np.arange(0, 4940)
-phase = np.arange(0, 2550)
+period = np.arange(0, 4935)
+phase = np.arange(0, 2600)
 depth = 0.006
-width = np.arange(0, 270)
+width = np.arange(0, 261)
 
 #Create an empty list to store the values of chi for plotting
 period_chi_value_list = []
@@ -44,10 +47,10 @@ phase_chi_value_list = []
 depth_chi_value_list = []
 width_chi_value_list = []
 
-period_interval = np.arange(4935, 4945)
-phase_interval = np.arange(2505, 2545)
+period_interval = np.arange(4700, 10000)
+phase_interval = np.arange(2400, 5000)
 depth_interval = np.arange(-0.020, 0.020, 0.001)
-width_interval = np.arange(250, 500)
+width_interval = np.arange(250, 10000)
 
 #Used in plotting the x label
 x_tick = []
@@ -137,5 +140,8 @@ sub2.set_ylabel(ylab)
 title = r'$\chi^2 = \sum_{i = 1}^N (D_i - M_i)^2$'
 sub2.set_title(title)
 
+t1 = t.clock()
+endt = t1 - t0
+print endt
 
 plt.show()

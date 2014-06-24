@@ -1,6 +1,9 @@
 import functions as f
 import matplotlib.pyplot as plt
 import numpy as np
+import time as t
+
+t0 = t.clock()
 
 kplr_id = '008191672'
 kplr_file = 'kplr008191672-2009322144938_slc.fits'
@@ -29,8 +32,8 @@ period_time = np.linspace(first, last, length) - first
 depth = 0.006
 width = np.arange(0, 270)
 
-period_range = np.arange(4500, 5500, 50)
-phase_range = np.arange(2300, 8300, 300)
+period_range = np.arange(4000, 5500, 50)
+phase_range = np.arange(2300, 3000, 50)
 
 #Convert the data point index to units in days.
 x_tick = []
@@ -51,8 +54,8 @@ period_days = np.asarray(period_days)
 
 phase_days = []
 for phase in phase_range:
-	print phase
-	print period_time[phase]
+	# print phase
+	# print period_time[phase]
 	phase_days.append(period_time[phase])
 phase_days = np.asarray(phase_days)
 
@@ -60,9 +63,13 @@ z = []
 for i in period_range:
 	line = []
 	for j in phase_range:
+		print i, j
 		line.append(f.sum_chi_squared(clean_flux, f.box(np.arange(0, i), np.arange(0, j), depth, width, length)))
 	z.append(line)
 z = np.asarray(z)
+
+t1 = t.clock()
+print t1 - t0
 
 plt.imshow(z, cmap = 'gray', aspect = 'auto', extent = (phase_days[0], phase_days[-1], period_days[0], period_days[-1]), origin = 'lower', interpolation = 'nearest')
 # plt.ticklabel_format(useOffset = False)
