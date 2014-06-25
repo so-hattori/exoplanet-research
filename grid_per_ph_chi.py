@@ -32,8 +32,8 @@ period_time = np.linspace(first, last, length) - first
 depth = 0.006
 width = np.arange(0, 270)
 
-period_range = np.arange(4000, 5500, 50)
-phase_range = np.arange(2300, 3000, 50)
+period_range = np.arange(2000, 12000, 10)
+phase_range = np.arange(2000, 10000, 10)
 
 #Convert the data point index to units in days.
 x_tick = []

@@ -52,12 +52,12 @@ length = clean_flux.shape[0]
 # print length
 
 #define arguments for the box_model
-phase = np.arange(0, 2530)
+phase = np.arange(0, 2529)
 depth = 0.009
 width = np.arange(0, 270)
 
 #This part of the code contains the main functionality.
-p_interval = np.arange(4900,5500)
+p_interval = np.arange(4900,11000)
 chi_squared_list = []
 #Set up a dictionary to assign the selected period to the appropriate chi-squared.
 chi_dict = {}
@@ -82,7 +82,7 @@ for i in p_interval:
 
 
 fig1 = plt.figure()
-sub1 = fig1.add_subplot(211)
+sub1 = fig1.add_subplot(121)
 sub1.plot(time, clean_flux, color="black", marker=",", linestyle = 'None')
 sub1.plot(time, f.box(np.arange(0, best_fit_period), phase, depth, width, length), color="blue", marker=",")
 
@@ -94,13 +94,15 @@ sub1.set_ylabel("Relative Brightness (electron flux)")
 plottitle="Light Curve for %s"%obsobject
 sub1.set_title(plottitle)
 
-sub2 = fig1.add_subplot(212)
+sub2 = fig1.add_subplot(122)
 sub2.plot(period_in_days, chi_squared_list, color = 'black', marker = '.', markersize = 10)
 sub2.ticklabel_format(useOffset = False)
 xlab2 = 'Period (days)'
 sub2.set_xlabel(xlab2)
 ylab = r'$\chi^2$'
 sub2.set_ylabel(ylab)
+title = r'$\chi^2 = \sum_{i = 1}^N (D_i - M_i)^2$'
+sub2.set_title(title)
 
 
 plt.show()

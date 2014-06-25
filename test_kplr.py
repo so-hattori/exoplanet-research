@@ -1,7 +1,8 @@
 import kplr
 client = kplr.API()
 
-star = client.star(12506954)
+kplr_id = raw_input('Input kepler ID: ')
+star = client.star(kplr_id)
 lcs = star.get_light_curves()
 
 time, flux, ferr, quality = [],[],[],[]
@@ -13,4 +14,3 @@ for lc in lcs:
 		flux.append(hdu_data['sap_flux'])
 		ferr.append(hdu_data['sap_flux_err'])
 		quality.append(hdu_data['sap_quality'])
-

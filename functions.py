@@ -48,10 +48,11 @@ def marginalize(array, box_half_width):
 #median of the data.
 def convert_to_relative(array):
 	median = np.median(array)
-	for i, e in enumerate(array):
-	#fractional relative flux
-		array[i] = ((e - median) / median)
-	return array
+	# for i, e in enumerate(array):
+	# #fractional relative flux
+	# 	array[i] = ((e - median) / median)
+	# return array
+	return (array / median) - 1	
 
 #Data clean-up
 #The following short code is to convert all the nan values to the median.
