@@ -13,7 +13,7 @@ kplr_id = '008191672'
 
 # Code to allow the user to decide which FITS format file to generate light curve.
 # filename = raw_input('Input FITS file to use: ')
-kplr_file = 'kplr008191672-2009322144938_slc.fits'
+kplr_file = 'kplr008191672-2010355172524_llc.fits'
 
 #Given the kplr ID and filename, open the FITS file and extract the data.
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
@@ -27,107 +27,67 @@ if flux_type == '1':
 elif flux_type == '2':
 	flux = lightdata.field('SAP_FLUX')
 
-# print flux
 
 #time array contains NaN values
-time = lightdata.field("TIME")            #Barycenter corrected Julian date
-# print time.shape
-m = np.isfinite(time) * np.isfinite(flux)
+time = lightdata.field("TIME") #Barycenter Corrected Julian Date
+flux_err = lightdata.field('PDCSAP_FLUX_ERR')
+#The following returns a boolean array where TRUE is returned if all three isfinite 
+#conditions are met.
+m = np.isfinite(time) * np.isfinite(flux) * np.isfinite(flux_err)
+#Only the array values that are TRUE are extracted from the original data.
+#This process ensures that there are no NaN values in the arrays.
 flux = flux[m]
 time = time[m]
+flux_err = flux_err[m]
+
+flux, flux_median = f.convert_to_relative(flux)
+variance = f.propagated_error(flux_err, flux_median)
+print variance
 assert 0
-first, last = time[0], time[-1]
-# clean_flux = f.nan_to_median(flux)
-flux = f.convert_to_relative(flux)
-length = clean_flux.shape[0]
-period_time = np.linspace(first, last, length) - first
 
-#define arguments for the box_model
-period = np.arange(0, 4967)
-phase = np.arange(0, 2433)
-depth = 0.006
-width = np.arange(0, 261)
+# period = 3.5
+# offset = 1.0
+depth = 0.007
+width = 0.25
 
-#Create an empty list to store the values of chi for plotting
-period_chi_value_list = []
-phase_chi_value_list = []
-depth_chi_value_list = []
-width_chi_value_list = []
+period_interval = 10 ** np.linspace(np.log10(2.5), np.log10(10), 700)
+offset_intervals = [np.arange(0, p, 0.01) for p in period_interval]
 
-period_interval = np.arange(10100, 10300)
-phase_interval = np.arange(2400, 2800)
-depth_interval = np.arange(-0.020, 0.020, 0.001)
-width_interval = np.arange(250, 1000)
+#The following grid is structured in a way where there is a list 
+#for all the chi2 values obtained for each period. For EACH period
+#there exists a nested list where the values are the chi2 values obtained 
+#for each offset it iterates through.
+#This structure is equivalent to a 2D array. The rows are the periods and 
+#the columns are offsets.
+chi2_grid = [[f.sum_chi_squared(flux, f.box(p, o, depth, width, time), variance)
+              for o in offsets] for p, offsets in zip(period_interval, offset_intervals)]
 
-#Used in plotting the x label
-x_tick = []
-xlab2 = 0
+#This map function iterates through the chi2_grid and finds the minimum for each period.
+#It means it is finding the lowest chi2 for each period, which is equal to selecting
+#the chi2 value with the best offset for each period.
+#It generates a list(array) of the the lowest chi2 values for each period.
+#The length of the list is equal to the number of periods.
+chi2_values = map(np.min, chi2_grid)
 
-#Refactoring to if/elif for the 4 parameters. This part should be heavily optimized later.
-choose_parameter = raw_input('Period[1], Phase[2], Depth[3], Width[4]: ')
-if choose_parameter == '1':
-	#Period 
-	period_chi_dict = f.period_search(period_chi_value_list, period_interval, phase, depth, width, length, clean_flux)
-	period_best_fit = f.best_parameter(period_chi_dict, period_chi_value_list)
-	print 'Best fit data point-wise: ', period_best_fit
-	print 'Best fit in days: ', period_time[period_best_fit]
-	period = np.arange(0, period_best_fit)
-	chi_value_list = period_chi_value_list
-	for i in period_interval:
-		x_tick.append(period_time[i])
-	xlab2 = 'Period (days)'
+#Return the index of the lowest chi2 in the chi2_values list.
+#This index corresponds to the best period as the first dimension of
+#both arrays are the same.
+lowest_chi2_index = np.argmin(chi2_values)
 
-elif choose_parameter == '2':
-	#Phase
-	phase_chi_dict = f.phase_search(phase_chi_value_list, phase_interval, phase, depth, width, length, clean_flux)
-	phase_best_fit = f.best_parameter(phase_chi_dict, phase_chi_value_list)
-	print 'Best fit data point-wise: ', phase_best_fit
-	print 'Best fit in days:', period_time[phase_best_fit]
-	phase = np.arange(0, phase_best_fit)
-	chi_value_list = phase_chi_value_list
-	for i in phase_interval:
-		x_tick.append(period_time[i])
-	xlab2 = 'Phase (days)'
+#Return the best period.
+parameter_best_fit = period_interval[lowest_chi2_index]
+period = parameter_best_fit
+print 'Best period: ', period
 
-elif choose_parameter == '3':
-	#Depth
-	depth_chi_dict = f.depth_search(depth_chi_value_list, depth_interval, period, phase, width, length, clean_flux)
-	depth_best_fit = f.best_parameter(depth_chi_dict, depth_chi_value_list)
-	print depth_best_fit
-	depth = depth_best_fit
-	chi_value_list = depth_chi_value_list
-	for i in depth_interval:
-		x_tick.append(i)
-	xlab2 = 'Depth (unitless)'
-
-elif choose_parameter == '4':
-	#Width
-	width_chi_dict = f.width_search(width_chi_value_list, width_interval, period, phase, depth, length, clean_flux)
-	width_best_fit = f.best_parameter(width_chi_dict, width_chi_value_list)
-	print width_best_fit
-	print period_time[width_best_fit]
-	width = np.arange(0, width_best_fit)
-	chi_value_list = width_chi_value_list
-	for i in width_interval:
-		x_tick.append(period_time[i])
-	xlab2 = 'Width (days)'
-
-#Once the best fit parameter is found, update the parameters
-# period = np.arange(0, period_best_fit)
-# phase = np.arange(0, phase_best_fit)
-# depth = depth_best_fit
-# width = np.arange(0, width_best_fit)
-
-# period_in_days = []
-# for i in period_interval:
-# 	period_in_days.append(period_time[i])
-
+#The first index finds the location of the best offset corresponding to 
+#the best period. The second index is the location of the best offset inside the best period.
+offset = offset_intervals[lowest_chi2_index][np.argmin(chi2_grid[lowest_chi2_index])]
+print 'Best offset: ', offset
 
 fig1 = plt.figure()
-sub1 = fig1.add_subplot(121)
-sub1.plot(time, clean_flux, color="black", marker=",", linestyle = 'None')
-sub1.plot(time, f.box(period, phase, depth, width, length), color="blue", marker=",")
-
+sub1 = fig1.add_subplot(221)
+sub1.plot(time, flux, ',k')
+sub1.plot(time, f.box(period, offset, depth, width, time), 'b')
 #The following code is to set the labels and title
 xlab = "Time (days, Kepler Barycentric Julian date - %s)"%jdadj
 # xlab = 'No Proper Units'
@@ -136,16 +96,43 @@ sub1.set_ylabel("Relative Brightness (electron flux)")
 plottitle="Light Curve for %s"%obsobject
 sub1.set_title(plottitle)
 
-sub2 = fig1.add_subplot(122)
-#Refactor the second argument of the following line so that it simplifies.
-sub2.plot(x_tick, chi_value_list, color = 'black', marker = '.', markersize = 10)
-sub2.ticklabel_format(useOffset = False)
-# xlab2 = 'Period (days)'
+sub2 = fig1.add_subplot(222)
+sub2.plot(period_interval, chi2_values, '.')
+sub2.ticklabel_format(style = 'sci')
+xlab2 = 'Period (days)'
 sub2.set_xlabel(xlab2)
 ylab = r'$\chi^2$'
 sub2.set_ylabel(ylab)
-title = r'$\chi^2 = \sum_{i = 1}^N (D_i - M_i)^2$'
+title = r'$\chi^2 = \sum_{i = 1}^N \frac{(D_i - M_i)^2}{\sigma^2_i}$'
 sub2.set_title(title)
+
+#Create plot zoomed around the best chi2 value.
+dense_period_interval = np.linspace(period-0.003, period+0.001, 1000)
+dense_offset_interval = [np.arange(0, p, 0.001) for p in dense_period_interval]
+
+dense_chi2_grid = [[f.sum_chi_squared(flux, f.box(p, o, depth, width, time), variance)
+              for o in offsets] for p, offsets in zip(dense_period_interval, dense_offset_interval)]
+dense_chi2_values = map(np.min, dense_chi2_grid)
+lowest_chi2_index = np.argmin(dense_chi2_values)
+period = dense_period_interval[lowest_chi2_index]
+
+#Rewrite this entire section later. Make it into a function.
+dense_period_interval = np.linspace(period-0.0001, period+0.0001, 1000)
+dense_offset_interval = [np.arange(0, p, 0.01) for p in dense_period_interval]
+
+dense_chi2_grid = [[f.sum_chi_squared(flux, f.box(p, o, depth, width, time), variance)
+              for o in offsets] for p, offsets in zip(dense_period_interval, dense_offset_interval)]
+dense_chi2_values = map(np.min, dense_chi2_grid)
+
+
+#Sub3 is a subplot that is a plot that is zoomed around the minimum of the chi2 graph.
+sub3 = fig1.add_subplot(223)
+sub3.plot(dense_period_interval, dense_chi2_values, 'r')
+sub3.ticklabel_format(useOffset = False)
+sub3.set_xlabel('Period (days)')
+sub3.set_ylabel(r'$\chi^2$')
+ymin = np.min(chi2_values) - 1
+ymax = ymin + 8
 
 t1 = t.clock()
 endt = t1 - t0

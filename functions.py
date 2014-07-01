@@ -19,132 +19,43 @@ def openfile(kplr_id, kplr_file):
 	
 	return jdadj, obsobject, lightdata
 
-#The following function will smoothen a graph by setting each point to
-#the value obtained by generating a box around the point and calculating its average.
-#array must be given with float elements at this point.
-#box_half_width will determine the size of the box.
-def marginalize(array, box_half_width):
-	size = len(array)
-	#Create an array of the same size
-	marg_array = np.zeros((size))
-	for indice, element in enumerate(array):
-		#Maintain original values if box cannot be created around point
-		if indice < box_half_width:
-			marg_array[indice] = array[indice]
-		#Create box around point and set it to the average of the box.
-		elif indice > (box_half_width - 1) and indice < size:
-			#average inside interval of box
-			box_list = array[(indice-box_half_width):indice + (box_half_width + 1)]
-			box_tot = sum(box_list)
-			# print box_tot
-			#Average of the y_elements inside the box
-			box_ave = box_tot / len(box_list)
-			marg_array[indice] = box_ave
-		#Last element stays the same as it cannot be averaged
-		marg_array[-1] = array[-1]
-	return marg_array
-
 #Function to convert the data points to a value that is relative to the 
 #median of the data.
 def convert_to_relative(array):
 	median = np.median(array)
-	# for i, e in enumerate(array):
-	# #fractional relative flux
-	# 	array[i] = ((e - median) / median)
-	# return array
-	return (array / median) - 1	
+	return ((array / median) - 1), median
+
+#Function to take in the flux error and return the propagated variance.
+def propagated_error(array, flux_median):
+	median = flux_median
+	prop_var = (array / median) ** 2
+	return prop_var
+
 
 #Data clean-up
 #The following short code is to convert all the nan values to the median.
 #At this point, I am unsure whether converting to the median is the proper approach.
-
-#The given array must meet the numpy requirements
-def nan_to_median(array):
-	median = np.median(array)
-	#goes through all elements to check and convert np.nan to the median.
-	for i, e in enumerate(array):
-		if np.isnan(e) == True:
-			array[i] = median
-		else:
-			pass
-	return array
-
-#function to check whether or not np.nan exists in an array.
-def check(array):
-	if np.isnan(np.sum(array)):
-		return 'NaN present'
-	else:
-		return 'no NaN'
 
 #box model
 #period, phase are arrays from 0 to the number of
 #the data point you want to generate the model.
 #depth is an integer.
 #width, length are arrays from 0 to the number of the data point.
-def box(period, phase, depth, width, length):
-	#test with a list instead of an numpy array first
-	y_list = []
-	fixed_y = 0.0
-	#insert the phase part of the graph.
-	#the larger the phase array, the larger the phase part
-	#of the model will be.
-	for elements in phase:
-		y_list.append(fixed_y)
-
-	#create a variable to keep the loop running for now
-	#Create a loop to add the width part and then the period part of the model.
-	run = True
-	while run:
-		for elements in width:
-			#all points in the transit are currently fixed at a value.
-			#this may be a problem afterwards.
-			y_list.append(fixed_y - depth)
-		for elements in period:
-			y_list.append(fixed_y)
-		if len(y_list) >= length:
-			run = False
-	#Just use the following code for now because I can't figure out
-	#a way to make the previous loop end when it reaches the length.
-	y_end = y_list[0:length]
-	return y_end
+def box(period, offset, depth, width, time):
+	in_transit = (time - offset) % period < width
+	model = np.zeros_like(time)
+	model[in_transit] -= depth
+	return model
 
 #returns the sum of the chi_squared values
-def sum_chi_squared(data_array, model_array):
-	data_array = np.array(data_array)
-	model_array = np.array(model_array)
-	chi2_array = (data_array - model_array)**2
+def sum_chi_squared(data_array, model_array, variance):
+	chi2_array = ((data_array - model_array)**2) / (variance) 
 	return np.sum(chi2_array)
-	# end_result = 0
-	# chi_squared = 0
-	# for i, e in enumerate(data_array):
-	# 	chi_squared = (data_array[i] - model_array[i])**2
-	# 	end_result += chi_squared
-	# return end_result
 
+def parameter_search():
+	period = np.linspace(2.5, 7.0, 10000)
+	sum_chi_squared(flux, )
 
-#Iterate through and creates a dictionary that assigns the period(in data points) 
-#to the appropriate chi-squared value
-#poi is the parameter of interest
-def parameter_search(poi, chi_value_list, interval, period, phase, depth, width, length, clean_flux):
-	chi_dict = {}
-	for element in interval:
-		print element
-		parameter = np.arange(0, element)
-		#The following if/elif part can probably be optimized
-		if poi == 'period':
-			period = parameter
-		elif poi == 'phase':
-			phase = parameter
-		elif poi == 'depth':
-			depth = element
-		elif poi == 'width':
-			width = parameter
-		box_y = box(period, phase, depth, width, length)
-		chi_squared_value = sum_chi_squared(clean_flux, box_y)
-		print chi_squared_value
-		chi_value_list.append(chi_squared_value)
-		chi_dict[chi_squared_value] = element
-	return chi_dict
 
 #For now, the parameter serach will be defined as different functions 
 #depending on the parameter for simplicity.
