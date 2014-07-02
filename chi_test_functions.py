@@ -18,32 +18,13 @@ kplr_file = 'kplr008191672-2010355172524_llc.fits'
 #Given the kplr ID and filename, open the FITS file and extract the data.
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
 
-#Allows the user to choose between PDCSAP or SAP to generate light curve.
-flux_type = '1'
-# flux_type = raw_input('PDCSAP[1], SAP[2]:' )
-flux = 0
-if flux_type == '1':
-	flux = lightdata.field("PDCSAP_FLUX")
-elif flux_type == '2':
-	flux = lightdata.field('SAP_FLUX')
+time, flux, flux_err = f.fix_data(lightdata)
 
-
-#time array contains NaN values
-time = lightdata.field("TIME") #Barycenter Corrected Julian Date
-flux_err = lightdata.field('PDCSAP_FLUX_ERR')
-#The following returns a boolean array where TRUE is returned if all three isfinite 
-#conditions are met.
-m = np.isfinite(time) * np.isfinite(flux) * np.isfinite(flux_err)
-#Only the array values that are TRUE are extracted from the original data.
-#This process ensures that there are no NaN values in the arrays.
-flux = flux[m]
-time = time[m]
-flux_err = flux_err[m]
+print time
+assert 0
 
 flux, flux_median = f.convert_to_relative(flux)
 variance = f.propagated_error(flux_err, flux_median)
-print variance
-assert 0
 
 # period = 3.5
 # offset = 1.0
@@ -108,7 +89,7 @@ sub2.set_title(title)
 
 #Create plot zoomed around the best chi2 value.
 dense_period_interval = np.linspace(period-0.003, period+0.001, 1000)
-dense_offset_interval = [np.arange(0, p, 0.001) for p in dense_period_interval]
+dense_offset_interval = [np.arange(0, p, 0.01) for p in dense_period_interval]
 
 dense_chi2_grid = [[f.sum_chi_squared(flux, f.box(p, o, depth, width, time), variance)
               for o in offsets] for p, offsets in zip(dense_period_interval, dense_offset_interval)]
