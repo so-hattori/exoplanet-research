@@ -29,17 +29,13 @@ def fix_data(lightdata):
 	flux_err = flux_err[m]
 	return time, flux, flux_err
 
-#Function to convert the data points to a value that is relative to the 
-#median of the data.
-def convert_to_relative(array):
-	median = np.median(array)
-	return ((array / median) - 1), median
 
-#Function to take in the flux error and return the propagated variance.
-def propagated_error(array, flux_median):
-	median = flux_median
-	prop_var = (array / median) ** 2
-	return prop_var
+#combine the two above functions
+def rescale(flux, flux_err):
+	median = np.median(flux)
+	scaled_flux = (flux / median) - 1
+	scaled_variance = (flux_err / median) ** 2
+	return scaled_flux, scaled_variance
 
 #Document later
 def box(period, offset, depth, width, time):
