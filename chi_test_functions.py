@@ -110,7 +110,7 @@ sub1.plot(time, f.box(best_period, best_offset, depth, width, time), 'b')
 
 #Sub3 is a subplot that is a plot that is zoomed around the minimum of the chi2 graph.
 sub3 = fig1.add_subplot(223)
-sub3.plot(dense_period_interval, dense_chi2_values, ',r')
+sub3.plot(dense_period_interval, dense_chi2_values, 'r')
 sub3.ticklabel_format(useOffset = False)
 sub3.set_xlabel('Period (days)')
 sub3.set_ylabel(r'$\chi^2$')

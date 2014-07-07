@@ -30,7 +30,8 @@ def fix_data(lightdata):
 	return time, flux, flux_err
 
 
-#combine the two above functions
+#Rescale the flux and the error.
+#The 1 sigma error given by the kepler data is converted to variance.
 def rescale(flux, flux_err):
 	median = np.median(flux)
 	scaled_flux = (flux / median) - 1

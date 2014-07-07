@@ -39,8 +39,19 @@ best_depth = upd_depth_int[np.argmin(upd_chi2)]
 print best_depth
 print np.min(upd_chi2)
 
+#Find the interval in the depth array where the chi2 values are (chi2 mimimum) + 10
+#Make a function of this later?
+minimum_chi2 = np.min(upd_chi2)
+x_bool = upd_chi2 < (minimum_chi2 + 10)
+x_int = upd_depth_int[x_bool]
+
+upd_chi2 = np.array(upd_chi2)
+y_int = upd_chi2[x_bool]
+
+
+#Generate light curve fro the data and fit the best fitting model given the parameters.
 fig1 = plt.figure()
-sub1 = fig1.add_subplot(221)
+sub1 = fig1.add_subplot(211)
 sub1.plot(time, flux, ',k')
 sub1.plot(time,f.box(period, offset, best_depth, width, time), 'b')
 xlab = "Time (days, Kepler Barycentric Julian date - %s)"%jdadj
@@ -49,15 +60,20 @@ sub1.set_ylabel("Relative Brightness (electron flux)")
 plottitle="Light Curve for %s"%obsobject
 sub1.set_title(plottitle)
 
-sub2 = fig1.add_subplot(222)
+#Compute chi2
+sub2 = fig1.add_subplot(212)
 sub2.plot(depth_interval, chi2, '.k')
 sub2.set_xlabel('Depth (Unitless)')
 sub2.set_ylabel(r'$\chi^2$')
 sub2_title = 'Depth search from {0} to {1}'.format(depth_interval[0], depth_interval[-1])
 sub2.set_title(sub2_title)
 
-sub3 = fig1.add_subplot(223)
-sub3.plot(upd_depth_int, upd_chi2, 'r')
+#Finer Search for chi2
+fig2 = plt.figure()
+sub3 = fig2.add_subplot(111)
+sub3.plot(x_int, y_int, 'r')
+sub3.ticklabel_format(useOffset = False)
+sub3.set_ylim(minimum_chi2-1, minimum_chi2+9)
 sub3.set_xlabel('Depth (Unitless)')
 sub3.set_ylabel(r'$\chi^2$')
 sub3_title = 'Finer Depth search from {0} to {1}'.format(upd_depth_int[0], upd_depth_int[-1])
