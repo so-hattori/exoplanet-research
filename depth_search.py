@@ -40,7 +40,7 @@ print best_depth
 print np.min(upd_chi2)
 
 #Find the interval in the depth array where the chi2 values are (chi2 mimimum) + 10
-#Make a function of this later?
+#Make this part a function later?
 minimum_chi2 = np.min(upd_chi2)
 x_bool = upd_chi2 < (minimum_chi2 + 10)
 x_int = upd_depth_int[x_bool]
