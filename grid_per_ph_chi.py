@@ -13,17 +13,21 @@ time, flux, flux_err = f.fix_data(lightdata)
 flux, variance = f.rescale(flux, flux_err)
 time -= np.min(time)
 
-depth = 0.007
-width = 0.25
+depth = 0.00650010001
+width = 0.177046694669
 
-period_interval = np.linspace(3.0, 7.2, 200)
-offset_intervals = np.linspace(0.0, 7.2, 500)
+period_interval = np.arange(2.00, 8.0, 0.03)
+offset_intervals = np.arange(0.00, 7.2, 0.01)
 
+#Change to numpy arrays to optimize.
 z = [[f.sum_chi_squared(flux, f.box(p,o,depth,width,time),variance) for o in offset_intervals]
 for p in period_interval]
 
+#print the time
+print t.clock() - t0
+
 z = np.asarray(z)
-plt.imshow(z, cmap = 'gray', extent = [offset_intervals.min(), offset_intervals.max(), period_interval[0], period_interval[-1]], origin = 'lower', interpolation='nearest')
+plt.imshow(z, cmap = 'gray', extent = [offset_intervals[0], offset_intervals[-1], period_interval[0], period_interval[-1]], origin = 'lower', interpolation='nearest')
 plt.colorbar()
 plt.xlabel('Offset (days)')
 plt.ylabel('Period (days)')

@@ -13,7 +13,7 @@ kplr_id = '008191672'
 
 # Code to allow the user to decide which FITS format file to generate light curve.
 # filename = raw_input('Input FITS file to use: ')
-kplr_file = 'kplr008191672-2010355172524_llc.fits'
+kplr_file = 'kplr008191672-2009322144938_slc.fits'
 
 #Given the kplr ID and filename, open the FITS file and extract the data.
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
@@ -22,22 +22,23 @@ flux, variance = f.rescale(flux, flux_err)
 time -= np.min(time)
 
 
-period = 3.54844624633
-offset = 0.0351050905091
-width = 0.189940094009
-depth = 0.00447129712971
+period = 3.54844630463
+offset = 0.0419513051305
+width = 0.177046694669
+depth = 0.00650010001
 
 period_interval = np.arange(1.0,8.0,0.0001)
-offset_interval = np.arange(0.00,5.0,0.0001)
+offset_interval = np.arange(0.00,3.0,0.0001)
 width_interval = np.arange(0.00,1.0,0.0001)
 depth_interval = np.arange(0.0, 0.02, 0.0001)
 
-x1 = 0
-first_interval = 0
-upd_int = 0
+# x1 = 0
+# first_interval = 0
+# upd_int = 0
 units = '(Days)'
+
 #Set the search here.
-parameter = 'width'
+parameter = raw_input('Parameter: ')
 if parameter == 'period':
 	x1 = period_interval
 	first_interval = period_interval
@@ -106,7 +107,7 @@ sub1.set_title(plottitle)
 
 #Compute chi2
 sub2 = fig1.add_subplot(212)
-sub2.plot(x1, chi2, '.k')
+sub2.plot(x1, chi2, 'b')
 sub2.set_xlabel('{0} {1}'.format(parameter, units))
 sub2.set_ylabel(r'$\chi^2$')
 
