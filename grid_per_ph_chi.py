@@ -6,7 +6,7 @@ import time as t
 t0 = t.clock()
 
 kplr_id = '008191672'
-kplr_file = 'kplr008191672-2009322144938_slc.fits'
+kplr_file = 'kplr008191672-2010355172524_llc.fits'
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
 
 time, flux, flux_err = f.fix_data(lightdata)

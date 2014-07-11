@@ -13,7 +13,7 @@ kplr_id = '008191672'
 
 # Code to allow the user to decide which FITS format file to generate light curve.
 # filename = raw_input('Input FITS file to use: ')
-kplr_file = 'kplr008191672-2009322144938_slc.fits'
+kplr_file = 'kplr008191672-2010355172524_llc.fits'
 
 #Given the kplr ID and filename, open the FITS file and extract the data.
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
@@ -27,7 +27,7 @@ offset = 0.0419513051305
 width = 0.177046694669
 depth = 0.00650010001
 
-period_interval = np.arange(1.0,8.0,0.0001)
+period_interval = np.arange(1.0,8.0,0.001)
 offset_interval = np.arange(0.00,3.0,0.0001)
 width_interval = np.arange(0.00,1.0,0.0001)
 depth_interval = np.arange(0.0, 0.02, 0.0001)
