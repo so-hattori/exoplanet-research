@@ -31,7 +31,7 @@ def fix_data(lightdata):
 
 
 #Rescale the flux and the error.
-#The 1 sigma error given by the kepler data is converted to variance.
+#The 1 sigma error given by the kepler data is converted to variance. n
 def rescale(flux, flux_err):
 	median = np.median(flux)
 	scaled_flux = (flux / median) - 1
@@ -44,6 +44,13 @@ def box(period, offset, depth, width, time):
 	model = np.zeros_like(time)
 	model[in_transit] -= depth
 	return model
+
+#injection function
+def injection(period, offset, depth, width, time, flux):
+	in_transit = (time - offset) % period < width
+	flux[in_transit] -= depth
+	return flux
+
 
 #returns the sum of the chi_squared values
 def sum_chi_squared(data_array, model_array, variance):
