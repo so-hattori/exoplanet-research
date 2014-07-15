@@ -45,11 +45,28 @@ def box(period, offset, depth, width, time):
 	model[in_transit] -= depth
 	return model
 
+#Push box model
+def push_box_model(offset, depth, width, time):
+	lower_limit = offset < time
+	upper_limit = time < offset+width
+	transit = lower_limit * upper_limit
+	pb_model = np.zeros_like(time)
+	pb_model[transit] -= depth
+	return pb_model
+
+def flat_model(time):
+	return np.zeros_like(time)
+
 #injection function
 def injection(period, offset, depth, width, time, flux):
 	in_transit = (time - offset) % period < width
 	flux[in_transit] -= depth
 	return flux
+
+#log likelihood
+def ln_like(data_array, model_array, variance):
+	chi2 = ((data_array - model_array)**2) / (variance) 
+	return (-1/2)*np.sum(chi2)
 
 
 #returns the sum of the chi_squared values
