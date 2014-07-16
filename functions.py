@@ -29,6 +29,10 @@ def fix_data(lightdata):
 	flux_err = flux_err[m]
 	return time, flux, flux_err
 
+def raw_injection(period, offset, depth, width, time, flux):
+	in_transit = (time - offset) % period < width
+	flux[in_transit] = flux[in_transit] * (1-depth)
+	return flux
 
 #Rescale the flux and the error.
 #The 1 sigma error given by the kepler data is converted to variance. n

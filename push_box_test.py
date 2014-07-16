@@ -13,19 +13,18 @@ kplr_file = 'kplr002973073-2009166043257_llc.fits'
 
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
 time, flux, flux_err = f.fix_data(lightdata)
-flux, variance = f.rescale(flux, flux_err)
 time -= np.median(time)
 
 inj_period = 300.00
 inj_offset = 12.0
 inj_depth = 0.000336
 inj_width = 0.11
+flux = f.raw_injection(inj_period,inj_offset,inj_depth,inj_width,time,flux)
 
-flux = f.injection(inj_period,inj_offset,inj_depth,inj_width,time,flux)
-
+flux, variance = f.rescale(flux, flux_err)
 
 width = 0.11
-depth = 0.0003336
+depth = 0.000336
 
 # offset_interval = np.linspace(time[0], time[-1], 10000)
 
