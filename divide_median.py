@@ -8,7 +8,7 @@ import functions as f
 import time as t
 t0 = t.clock()
 
-#This is terrible, figure out a way to do this automatically.
+#This is terrible, figure out a way to do this automatically and without writing out all the files....
 kplr_id = '002973073'
 kplr_filename_list = ('kplr002973073-2009131105131_llc.fits',
 						'kplr002973073-2009166043257_llc.fits',
@@ -31,7 +31,11 @@ kplr_filename_list = ('kplr002973073-2009131105131_llc.fits',
 						)
 
 lightdata_list = f.comb_openfile(kplr_id, kplr_filename_list)
-time, flux, variance = f.comb_data(lightdata_list)
+#The following normalizes and also combines the data.
+# time, flux, variance = f.comb_data(lightdata_list)
+
+#The following does NOT normalize the data but combines it.
+time, flux, variance = f.nonnorm_data(lightdata_list)
 # print time.shape
 # assert 0
 time -= np.median(time)

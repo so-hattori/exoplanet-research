@@ -62,6 +62,23 @@ def comb_data(lightdata_list):
 	comb_variance = np.concatenate(variance_list)
 	return comb_time, comb_flux, comb_variance
 
+#Create a function that combines the data without normalization.
+def nonnorm_data(lightdata_list):
+	time_list = []
+	flux_list = []
+	variance_list = []
+	for lightdata in lightdata_list:
+		time, flux, flux_err = fix_data(lightdata)
+		#rescale the flux and convert to flux_err
+		# flux, variance = rescale(flux, flux_err)
+		time_list.append(time)
+		flux_list.append(flux)
+		variance_list.append((flux_err**2))
+	comb_time = np.concatenate(time_list)
+	comb_flux = np.concatenate(flux_list)
+	comb_variance = np.concatenate(variance_list)
+	return comb_time, comb_flux, comb_variance
+
 #Rescale the flux and the error.
 #The 1 sigma error given by the kepler data is converted to variance.
 def rescale(flux, flux_err):
