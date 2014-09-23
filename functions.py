@@ -66,7 +66,7 @@ def comb_data(lightdata_list):
 #The 1 sigma error given by the kepler data is converted to variance.
 def rescale(flux, flux_err):
 	median = np.median(flux)
-	scaled_flux = (flux / median) - 1
+	scaled_flux = (flux / median)
 	scaled_variance = (flux_err / median) ** 2
 	return scaled_flux, scaled_variance
 
@@ -88,15 +88,38 @@ def push_box_model(offset, depth, width, time):
 	lower_limit = offset < time
 	upper_limit = time < offset+width
 	transit = lower_limit * upper_limit
-	pb_model = np.zeros_like(time)
+	pb_model = np.ones_like(time)
 	pb_model[transit] -= depth
 	return pb_model
 
-def unity_push_box(offset, depth, width, time):
+#median filter
+def median_filter(array, box_width):
+	new_array = np.zeros([array.shape[0]])
+	for i, e in enumerate(array):
+		if i > box_width:
+			box = array[i-box_width : i+box_width]
+			value = np.median(box)
+		else:
+			value = e
+		new_array[i] = value
+	print new_array.shape
+	return new_array
+
+#moving average filter
+def ma_filter(array, box_width):
+	new_array = np.zeros([array.shape[0]])
+	for i, e in enumerate(array):
+		if i > box_width:
+			box = array[i-box_width : i+box_width]
+			value = np.sum(box) / box.shape[0]
+		else:
+			value = e
+		new_array[i] = value
+	return new_array
 
 
 def flat_model(time):
-	return np.zeros_like(time)
+	return np.ones_like(time)
 
 #injection function
 def injection(period, offset, depth, width, time, flux):
@@ -123,3 +146,14 @@ def sum_chi_squared(data_array, model_array, variance):
 def pre_sum(data_array, model_array):
 	chi2_array = (data_array - model_array) **2
 	return np.sum(chi2_array)
+
+#generate vertical lines
+def vertical_lines(inj_period, time, plot_designation, inj_width, ylim_limits):
+	integers = np.arange(-5,5,1)
+	inj_times = integers * inj_period
+	low_limit_time = inj_times > time.min()
+	high_limit_time = inj_times < time.max()
+	time_limits = low_limit_time * high_limit_time
+	inj_times = inj_times[time_limits]
+	for i in inj_times:
+		plot_designation.vlines(i+(inj_width/2), ylim_limits[0], ylim_limits[-1], 'r')
