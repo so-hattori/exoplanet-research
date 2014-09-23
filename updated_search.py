@@ -13,7 +13,7 @@ kplr_id = '008191672'
 
 # Code to allow the user to decide which FITS format file to generate light curve.
 # filename = raw_input('Input FITS file to use: ')
-kplr_file = 'kplr008191672-2010355172524_llc.fits'
+kplr_file = 'kplr008191672-2013011073258_llc.fits'
 
 #Given the kplr ID and filename, open the FITS file and extract the data.
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
@@ -22,13 +22,13 @@ flux, variance = f.rescale(flux, flux_err)
 time -= np.min(time)
 
 
-period = 3.54844630463
-offset = 0.0419513051305
+period = 3.54844644464
+offset = 1.90818869887
 width = 0.177046694669
 depth = 0.00650010001
 
 period_interval = np.arange(1.0,8.0,0.001)
-offset_interval = np.arange(0.00,3.0,0.0001)
+offset_interval = np.arange(0.00,8.0,0.001)
 width_interval = np.arange(0.00,1.0,0.0001)
 depth_interval = np.arange(0.0, 0.02, 0.0001)
 
@@ -98,11 +98,13 @@ y_int = upd_chi2[x_bool]
 fig1 = plt.figure()
 sub1 = fig1.add_subplot(211)
 sub1.plot(time, flux, ',k')
+print offset
 sub1.plot(time,f.box(period, offset, depth, width, time), 'b')
 xlab = "Time (days, Kepler Barycentric Julian date - %s)"%jdadj
 sub1.set_xlabel(xlab)
 sub1.set_ylabel("Relative Brightness (electron flux)")
 plottitle="Light Curve for %s"%obsobject
+plottitle = 'Period:{0} Offset:{1}'.format(period, offset)
 sub1.set_title(plottitle)
 
 #Compute chi2

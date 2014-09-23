@@ -34,15 +34,18 @@ lightdata = FITSfile[1].data
 #Convert the data to fractional relative flux
 #Currently this code is written to generate graphs for PDCSAP_FLUX.
 flux = lightdata.field("PDCSAP_FLUX")
+time = lightdata.field('TIME')
+print time
+assert 0
 median = np.median(flux)
-for i, e in enumerate(flux):
-	#fractional relative flux
-	flux[i] = ((e - median) / median)
+# for i, e in enumerate(flux):
+# 	#fractional relative flux
+# 	flux[i] = ((e - median) / median)
 
 time = lightdata.field("TIME")            #Barycenter corrected Julian date
 fig1 = plt.figure()
 sub1 = fig1.add_subplot(111)
-sub1.plot(time ,flux, color="black", marker=",", linestyle = 'None')
+sub1.plot(time,flux, color="black", marker=",", linestyle = 'None')
 
 #The following code is to set the labels and title
 xlab = "Time (days, Kepler Barycentric Julian date - %s)"%jdadj

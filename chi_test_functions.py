@@ -13,7 +13,7 @@ kplr_id = '008191672'
 
 # Code to allow the user to decide which FITS format file to generate light curve.
 # filename = raw_input('Input FITS file to use: ')
-kplr_file = 'kplr008191672-2010355172524_llc.fits'
+kplr_file = 'kplr008191672-2013011073258_llc.fits'
 
 #Given the kplr ID and filename, open the FITS file and extract the data.
 jdadj, obsobject, lightdata = f.openfile(kplr_id, kplr_file)
@@ -23,11 +23,13 @@ time -= np.min(time)
 
 # period = 3.5
 # offset = 1.0
-depth = 0.0045
-width = 0.25
+depth = 0.00650010001
+width = 0.177046694669
 
-period_interval = 10 ** np.linspace(np.log10(2.5), np.log10(10), 700)
-offset_intervals = [np.arange(0, p, 0.01) for p in period_interval]
+# period_interval = 10 ** np.linspace(np.log10(2.5), np.log10(10), 700)
+period_interval = np.linspace(3.0,4.0,1000)
+offset_start = 1.5
+offset_intervals = [np.arange(offset_start, p, 0.01) for p in period_interval]
 
 #The following grid is structured in a way where there is a list 
 #for all the chi2 values obtained for each period. For EACH period
@@ -83,8 +85,8 @@ title = r'$\chi^2 = \sum_{i = 1}^N \frac{(D_i - M_i)^2}{\sigma^2_i}$'
 sub2.set_title(title)
 
 #Create plot zoomed around the best chi2 value.
-dense_period_interval = np.linspace(period-0.003, period+0.001, 500)
-dense_offset_interval = [np.arange(0, p, 0.01) for p in dense_period_interval]
+dense_period_interval = np.linspace(period-0.003, period+0.001, 300)
+dense_offset_interval = [np.arange(offset_start, p, 0.01) for p in dense_period_interval]
 
 dense_chi2_grid = [[f.sum_chi_squared(flux, f.box(p, o, depth, width, time), variance)
               for o in offsets] for p, offsets in zip(dense_period_interval, dense_offset_interval)]
@@ -93,8 +95,8 @@ lowest_chi2_index = np.argmin(dense_chi2_values)
 period = dense_period_interval[lowest_chi2_index]
 
 #Rewrite this entire section later. Make it into a function.
-dense_period_interval = np.linspace(period-0.0001, period+0.0001, 500)
-dense_offset_interval = [np.arange(0, p, 0.001) for p in dense_period_interval]
+dense_period_interval = np.linspace(period-0.0001, period+0.0001, 300)
+dense_offset_interval = [np.arange(offset_start, p, 0.001) for p in dense_period_interval]
 
 dense_chi2_grid = [[f.sum_chi_squared(flux, f.box(p, o, depth, width, time), variance)
               for o in offsets] for p, offsets in zip(dense_period_interval, dense_offset_interval)]
@@ -102,7 +104,7 @@ dense_chi2_values = map(np.min, dense_chi2_grid)
 
 low_chi2_index = np.argmin(dense_chi2_values)
 best_period = dense_period_interval[low_chi2_index]
-best_offset = dense_offset_interval[low_chi2_index][np.argmin(chi2_grid[low_chi2_index])]
+best_offset = dense_offset_interval[low_chi2_index][np.argmin(dense_chi2_grid[low_chi2_index])]
 print np.min(dense_chi2_values)
 print 'Best period: ', best_period
 print 'Best offset: ', best_offset

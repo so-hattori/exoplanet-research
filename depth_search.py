@@ -21,6 +21,7 @@ time, flux, flux_err = f.fix_data(lightdata)
 flux, variance = f.rescale(flux, flux_err)
 time -= np.min(time)
 
+
 period = 3.54844624633
 offset = 0.061
 width = 0.25
