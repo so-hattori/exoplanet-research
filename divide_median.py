@@ -8,6 +8,7 @@ import functions as f
 import time as t
 t0 = t.clock()
 
+#This is terrible, figure out a way to do this automatically.
 kplr_id = '002973073'
 kplr_filename_list = ('kplr002973073-2009131105131_llc.fits',
 						'kplr002973073-2009166043257_llc.fits',
