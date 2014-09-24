@@ -30,30 +30,57 @@ kplr_filename_list = ('kplr002973073-2009131105131_llc.fits',
 						'kplr002973073-2013131215648_llc.fits'
 						)
 
-lightdata_list = f.comb_openfile(kplr_id, kplr_filename_list)
-#The following normalizes and also combines the data.
-# time, flux, variance = f.comb_data(lightdata_list)
+# lightdata_list = f.comb_openfile(kplr_id, kplr_filename_list)
+# #The following normalizes and also combines the data.
+# # time, flux, variance = f.comb_data(lightdata_list)
 
-#The following does NOT normalize the data but combines it.
-time, flux, variance = f.nonnorm_data(lightdata_list)
-# print time.shape
-# assert 0
-time -= np.median(time)
+# #The following does NOT normalize the data but combines it.
+# time, flux, variance = f.nonnorm_data(lightdata_list)
+# # print time.shape
+# # assert 0
+# time -= np.median(time)
+
+# # The following 5 lines of code create a fake transit signal inside the data.
+# inj_period = 200.00
+# inj_offset = 0.0
+# inj_depth = 0.00989188
+# inj_width = 1.21325
+# flux = f.raw_injection(inj_period,inj_offset,inj_depth,inj_width,time,flux)
+# med_flux = f.median_filter(flux, 100)
+
+# #Now we need to divide the "raw" data with the median filter to divide out noise.
+# new_flux = flux / med_flux
 
 # The following 5 lines of code create a fake transit signal inside the data.
 inj_period = 200.00
 inj_offset = 0.0
 inj_depth = 0.00989188
 inj_width = 1.21325
-flux = f.raw_injection(inj_period,inj_offset,inj_depth,inj_width,time,flux)
-med_flux = f.median_filter(flux, 100)
 
-#Now we need to divide the "raw" data with the median filter to divide out noise.
-new_flux = flux / med_flux
+new_lightdata_list = []
+time_list = []
+raw_flux_list = []
+med_flux_list = []
+variance_list = []
+for i in kplr_filename_list:
+	lightdata = f.openfile(kplr_id, i)
+	time, flux, flux_err = f.fix_data(lightdata)
+	time_list.append(time)
+	raw_flux_list.append(flux)
+	variance_list.append(flux_err**2)
+	#This is where the injection happens
+	flux = f.raw_injection(inj_period,inj_offset,inj_depth,inj_width,time,flux)
+	#This is where the filtering happens
+	median = f.median_filter(flux, 50)
+	med_flux_list.append(flux / median)
+time = np.concatenate(time_list)
+raw_flux = np.concatenate(raw_flux_list)
+med_flux = np.concatenate(med_flux_list)
+variance = np.concatenate(variance_list)
 
 fig1 = plt.figure()
 sub1 = fig1.add_subplot(111)
-sub1.plot(time, flux, ',k')
+sub1.plot(time, raw_flux, ',k')
 # ylim_range = 0.015
 # ylim_limits = [1-ylim_range,1+0.5*(ylim_range)]
 # sub1.set_ylim(ylim_limits[0],ylim_limits[-1])
@@ -69,7 +96,7 @@ sub1.ticklabel_format(useOffset = False)
 
 fig3 = plt.figure()
 sub3 = fig3.add_subplot(111)
-sub3.plot(time, new_flux, ',k')
+sub3.plot(time, med_flux, ',k')
 # ylim_range = 0.015
 # ylim_limits = [1-ylim_range,1+0.5*(ylim_range)]
 # sub3.set_ylim(ylim_limits[0],ylim_limits[-1])

@@ -16,7 +16,9 @@ def openfile(kplr_id, kplr_file):
 	obsobject = str(dataheader['OBJECT']) # the ID of the observed object
 	lightdata = FITSfile[1].data #the part of the FITS file where all the data is stored.
 	FITSfile.close()	
-	return jdadj, obsobject, lightdata
+	#Choose the data you want returned by commenting out either of the next two lines.
+	# return jdadj, obsobject, lightdata
+	return lightdata
 
 def comb_openfile(kplr_id, kplr_filenamelist):
 	path = '/Users/SHattori/.kplr/data/lightcurves/%s' %kplr_id
@@ -78,6 +80,7 @@ def nonnorm_data(lightdata_list):
 	comb_flux = np.concatenate(flux_list)
 	comb_variance = np.concatenate(variance_list)
 	return comb_time, comb_flux, comb_variance
+
 
 #Rescale the flux and the error.
 #The 1 sigma error given by the kepler data is converted to variance.
