@@ -9,27 +9,45 @@ import time as t
 t0 = t.clock()
 
 #This is terrible, figure out a way to do this automatically and without writing out all the files....
-kplr_id = '002973073'
-kplr_filename_list = ('kplr002973073-2009131105131_llc.fits',
-						'kplr002973073-2009166043257_llc.fits',
-						'kplr002973073-2009259160929_llc.fits',
-						'kplr002973073-2009350155506_llc.fits',
-						'kplr002973073-2010078095331_llc.fits',
-						'kplr002973073-2010174085026_llc.fits',
-						'kplr002973073-2010265121752_llc.fits',
-						'kplr002973073-2010355172524_llc.fits',
-						'kplr002973073-2011073133259_llc.fits',
-						'kplr002973073-2011177032512_llc.fits',
-						'kplr002973073-2011271113734_llc.fits',
-						'kplr002973073-2012004120508_llc.fits',
-						'kplr002973073-2012088054726_llc.fits',
-						'kplr002973073-2012179063303_llc.fits',
-						'kplr002973073-2012277125453_llc.fits',
-						'kplr002973073-2013011073258_llc.fits',
-						'kplr002973073-2013098041711_llc.fits',
-						'kplr002973073-2013131215648_llc.fits'
-						)
-
+# kplr_id = '002973073'
+# kplr_filename_list = ('kplr002973073-2009131105131_llc.fits',
+# 						'kplr002973073-2009166043257_llc.fits',
+# 						'kplr002973073-2009259160929_llc.fits',
+# 						'kplr002973073-2009350155506_llc.fits',
+# 						'kplr002973073-2010078095331_llc.fits',
+# 						'kplr002973073-2010174085026_llc.fits',
+# 						'kplr002973073-2010265121752_llc.fits',
+# 						'kplr002973073-2010355172524_llc.fits',
+# 						'kplr002973073-2011073133259_llc.fits',
+# 						'kplr002973073-2011177032512_llc.fits',
+# 						'kplr002973073-2011271113734_llc.fits',
+# 						'kplr002973073-2012004120508_llc.fits',
+# 						'kplr002973073-2012088054726_llc.fits',
+# 						'kplr002973073-2012179063303_llc.fits',
+# 						'kplr002973073-2012277125453_llc.fits',
+# 						'kplr002973073-2013011073258_llc.fits',
+# 						'kplr002973073-2013098041711_llc.fits',
+# 						'kplr002973073-2013131215648_llc.fits'
+# 						)
+kplr_id = '012506954'
+kplr_filename_list = ('kplr012506954-2009131105131_llc.fits',
+'kplr012506954-2009166043257_llc.fits',
+'kplr012506954-2009259160929_llc.fits',
+'kplr012506954-2009350155506_llc.fits',
+'kplr012506954-2010078095331_llc.fits',
+'kplr012506954-2010174085026_llc.fits',
+'kplr012506954-2010265121752_llc.fits',
+'kplr012506954-2010355172524_llc.fits',
+'kplr012506954-2011073133259_llc.fits',
+'kplr012506954-2011177032512_llc.fits',
+'kplr012506954-2011271113734_llc.fits',
+'kplr012506954-2012004120508_llc.fits',
+'kplr012506954-2012088054726_llc.fits',
+'kplr012506954-2012179063303_llc.fits',
+'kplr012506954-2012277125453_llc.fits',
+'kplr012506954-2013011073258_llc.fits',
+'kplr012506954-2013098041711_llc.fits',
+'kplr012506954-2013131215648_llc.fits')
 # lightdata_list = f.comb_openfile(kplr_id, kplr_filename_list)
 # #The following normalizes and also combines the data.
 # # time, flux, variance = f.comb_data(lightdata_list)
@@ -71,7 +89,7 @@ for i in kplr_filename_list:
 	#This is where the injection happens
 	flux = f.raw_injection(inj_period,inj_offset,inj_depth,inj_width,time,flux)
 	#This is where the filtering happens
-	median = f.median_filter(flux, 50)
+	median = f.median_filter(flux, 75)
 	med_flux_list.append(flux / median)
 time = np.concatenate(time_list)
 raw_flux = np.concatenate(raw_flux_list)
