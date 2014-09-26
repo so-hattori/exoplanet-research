@@ -3,6 +3,7 @@
 import numpy as np
 import os
 import pyfits
+import kplr
 
 #function to open the FITS format file given kepler id and filename.
 def openfile(kplr_id, kplr_file):
@@ -35,6 +36,22 @@ def comb_openfile(kplr_id, kplr_filenamelist):
 		lightdata_list.append(lightdata)
 		FITSfile.close()
 	return lightdata_list
+
+#Create an optimized version of obtaining kplr data with only the ID.
+def kplr_list(kplr_id):
+	client = kplr.API()
+	star = client.star(kplr_id)
+	lcs = star.get_lightcurves(short_cadence = False)
+	time, flux, flux_err = [], [], []
+	for lc in lcs:
+    	with lc.open() as f:
+        	# The lightcurve data are in the first FITS HDU.
+        	hdu_data = f[1].data
+        	time.append(hdu_data["time"])
+        	flux.append(hdu_data["pdcsap_flux"])
+        	flux_err.append(hdu_data["pdcsap_flux_err"])
+    return time, flux, flux_err
+
 
 
 #function to handle removing Nan values in the arrays
