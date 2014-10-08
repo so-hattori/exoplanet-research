@@ -80,6 +80,11 @@ time_list = []
 raw_flux_list = []
 med_flux_list = []
 variance_list = []
+
+#Set filter box width
+filter_size = 80
+#Filter size 80 was chosen during the group meeting on September 26th, 2014.
+
 for i in kplr_filename_list:
 	lightdata = f.openfile(kplr_id, i)
 	time, flux, flux_err = f.fix_data(lightdata)
@@ -89,7 +94,7 @@ for i in kplr_filename_list:
 	#This is where the injection happens
 	flux = f.raw_injection(inj_period,inj_offset,inj_depth,inj_width,time,flux)
 	#This is where the filtering happens
-	median = f.median_filter(flux, 75)
+	median = f.median_filter(flux, filter_size)
 	med_flux_list.append(flux / median)
 time = np.concatenate(time_list)
 raw_flux = np.concatenate(raw_flux_list)
@@ -115,8 +120,11 @@ sub1.ticklabel_format(useOffset = False)
 fig3 = plt.figure()
 sub3 = fig3.add_subplot(111)
 sub3.plot(time, med_flux, ',k')
-# ylim_range = 0.015
-# ylim_limits = [1-ylim_range,1+0.5*(ylim_range)]
-# sub3.set_ylim(ylim_limits[0],ylim_limits[-1])
+sub3.set_title(filter_size)
+sub3.set_xlabel("Days")
+sub3.set_ylabel("Normalized Flux")
+ylim_range = 0.015
+ylim_limits = [1-ylim_range,1+0.5*(ylim_range)]
+sub3.set_ylim(ylim_limits[0],ylim_limits[-1])
 sub3.ticklabel_format(useOffset = False)
 plt.show()

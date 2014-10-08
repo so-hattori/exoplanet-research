@@ -18,8 +18,8 @@ def openfile(kplr_id, kplr_file):
 	lightdata = FITSfile[1].data #the part of the FITS file where all the data is stored.
 	FITSfile.close()	
 	#Choose the data you want returned by commenting out either of the next two lines.
-	# return jdadj, obsobject, lightdata
-	return lightdata
+	return jdadj, obsobject, lightdata
+	# return lightdata
 
 def comb_openfile(kplr_id, kplr_filenamelist):
 	path = '/Users/SHattori/.kplr/data/lightcurves/%s' %kplr_id
@@ -44,13 +44,13 @@ def kplr_list(kplr_id):
 	lcs = star.get_lightcurves(short_cadence = False)
 	time, flux, flux_err = [], [], []
 	for lc in lcs:
-    	with lc.open() as f:
-        	# The lightcurve data are in the first FITS HDU.
-        	hdu_data = f[1].data
-        	time.append(hdu_data["time"])
-        	flux.append(hdu_data["pdcsap_flux"])
-        	flux_err.append(hdu_data["pdcsap_flux_err"])
-    return time, flux, flux_err
+		with lc.open() as f:
+		# The lightcurve data are in the first FITS HDU.
+			hdu_data = f[1].data
+			time.append(hdu_data["time"])
+			flux.append(hdu_data["pdcsap_flux"])
+			flux_err.append(hdu_data["pdcsap_flux_err"])
+	return time, flux, flux_err
 
 
 
@@ -64,6 +64,13 @@ def fix_data(lightdata):
 	time = time[m]
 	flux_err = flux_err[m]
 	return time, flux, flux_err
+
+def remove_nan(time, flux, ferr):
+	m = np.isfinite(time) * np.isfinite(flux) * np.isfinite(ferr)
+	flux = flux[m]
+	time = time[m]
+	ferr = ferr[m]
+	return time, flux, ferr
 
 def comb_data(lightdata_list):
 	time_list = []
@@ -172,6 +179,12 @@ def raw_injection(period, offset, depth, width, time, flux):
 #log likelihood
 def ln_like(data_array, model_array, variance):
 	chi2 = ((data_array - model_array)**2) / (variance) 
+	return (-1/2)*np.sum(chi2)
+
+#Create a test function to return a relative ln_like without 
+#taking into account the variance.
+def pre_ln_like(data_array, model_array):
+	chi2 = (data_array - model_array)**2
 	return (-1/2)*np.sum(chi2)
 
 
