@@ -1,31 +1,55 @@
 \documentclass[12pt, preprint]{aastex}
 
+\newcounter{affil}
 \newcommand{\project}[1]{\textsl{#1}}
 \newcommand{\Kepler}{\project{Kepler}}
 
 \begin{document}
 
 \title{%
-  Single transits in the \Kepler\ data\\
-  and The abundance of extra-solar Jupiter analogs}
+  Single transits in the NASA \Kepler\ data\\
+  and the abundance of extra-solar Jupiter analogs}
 
 \author{%
   So Hattori\altaffilmark{\ref{nyuad}},
   Dan Foreman-Mackey\altaffilmark{\ref{ccpp}},
   David W. Hogg\altaffilmark{\ref{ccpp}, \ref{cds}, \ref{mpia}},
   and others}
-\newcounter{affil}
-\altaffiltext{\refstepcounter{affil}\theaffil\label{nyuad}}{%
-  Department of Physics, NYUAD}
-\altaffiltext{\refstepcounter{affil}\theaffil\label{nyuad}}{%
-  CCPP, Department of Physics, NYU}
-\altaffiltext{\refstepcounter{affil}\theaffil\label{nyuad}}{%
-  Center for Data Science, NYU}
-\altaffiltext{\refstepcounter{affil}\theaffil\label{nyuad}}{%
+\refstepcounter{affil}\label{nyuad}\altaffiltext{\theaffil}{%
+  Department of Physics, New York University Abu Dhabi}
+\refstepcounter{affil}\label{ccpp}\altaffiltext{\theaffil}{%
+  Center for Cosmology and Particle Physics,
+  Department of Physics, New York University}
+\refstepcounter{affil}\label{cds}\altaffiltext{\theaffil}{%
+  Center for Data Science, New York University}
+\refstepcounter{affil}\label{mpia}\altaffiltext{\theaffil}{%
   Max-Planck-Institut f\"ur Astronomie}
 
 \begin{abstract}
-hello world!
+In the Solar System, gravitational perturbations from Jupiter are
+critical in setting the distribution of planets (in mass and
+semi-major axis).
+If we want to understand Solar-System formation, we need to understand
+planets like Jupiter.
+The \Kepler\ mission operated for 4.1 years; long-period planets
+analogous to Jupiter will not transit multiple times in the data.
+Searches for periodic signals in the \Kepler\ data will not reveal
+Jupiter analogs.
+Here we search the light-curves of dwarf stars in [temperature ranges]
+in the \Kepler\ data for single transits that have roughly the right
+duration and depth to be single transits of long-period gas-giant
+planets.
+We use probabilistic hypothesis tests against alternatives to rule out
+instrument-generated artifact false-positives, and probabilistic
+inference to obtain likelihood information about planet radius and
+orbital period.
+Each transit we find gives exceedingly low signal-to-noise information
+about period but we combine the likelihood information using a
+hierarchical model to infer properties of the full distribution of
+long-period, large planets.
+We find ZZZ.
+We discuss the problem of astrophysical false positives, but the
+conservative position is to treat this measurement as an upper limit.
 \end{abstract}
 
 hello world.
