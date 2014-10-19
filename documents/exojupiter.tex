@@ -1,4 +1,5 @@
 \documentclass[12pt, preprint]{aastex}
+\input{vc}
 
 \newcounter{affil}
 \newcommand{\project}[1]{\textsl{#1}}
@@ -12,18 +13,22 @@
 
 \author{%
   So Hattori\altaffilmark{\ref{nyuad}},
-  Dan Foreman-Mackey\altaffilmark{\ref{ccpp}},
+  Daniel Foreman-Mackey\altaffilmark{\ref{ccpp}},
   David W. Hogg\altaffilmark{\ref{ccpp}, \ref{cds}, \ref{mpia}},
   and others}
-\refstepcounter{affil}\label{nyuad}\altaffiltext{\theaffil}{%
+\refstepcounter{affil}\label{nyuad}\altaffiltext{\ref{nyuad}}{%
   Department of Physics, New York University Abu Dhabi}
-\refstepcounter{affil}\label{ccpp}\altaffiltext{\theaffil}{%
+\refstepcounter{affil}\label{ccpp}\altaffiltext{\ref{ccpp}}{%
   Center for Cosmology and Particle Physics,
   Department of Physics, New York University}
-\refstepcounter{affil}\label{cds}\altaffiltext{\theaffil}{%
+\refstepcounter{affil}\label{cds}\altaffiltext{\ref{cds}}{%
   Center for Data Science, New York University}
-\refstepcounter{affil}\label{mpia}\altaffiltext{\theaffil}{%
+\refstepcounter{affil}\label{mpia}\altaffiltext{\ref{mpia}}{%
   Max-Planck-Institut f\"ur Astronomie}
+
+\date{~\hfill
+  DRAFT --- not for distribution --- \texttt{git hash \githash\ (\gitdate)}
+  \hfill~}
 
 \begin{abstract}
 In the Solar System, gravitational perturbations from Jupiter are
@@ -47,7 +52,7 @@ Each transit we find gives exceedingly low signal-to-noise information
 about period but we combine the likelihood information using a
 hierarchical model to infer properties of the full distribution of
 long-period, large planets.
-We find ZZZ.
+We find [some results].
 We discuss the problem of astrophysical false positives, but the
 conservative position is to treat this measurement as an upper limit.
 \end{abstract}
