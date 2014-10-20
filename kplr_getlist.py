@@ -4,7 +4,7 @@ import numpy as np
 import functions
 client = kplr.API()
 
-star = client.star(8120608)
+star = client.star(8800954)
 
 lcs = star.get_light_curves(short_cadence=False)
 
