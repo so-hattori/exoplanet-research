@@ -1,4 +1,4 @@
-# exoplanet-research
+# LongPeriodExoplanets
 
 Finding large, cold planets by looking for single transits in NASA *Kepler* data.
 
