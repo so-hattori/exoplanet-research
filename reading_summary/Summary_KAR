@@ -1,0 +1,23 @@
+Chapter 1 deals with the technical details of the kepler mission and describes the process in which the data is presented. 
+
+The Kepler mission's target is to survey a region in the milky way galaxy to find exoplanets potentially in the habitable zone.
+
+Chapter 2 discusses how the data sets are formatted and what they contain. Some of the data products available from the kepler archive include light curves, target pixel data, and FFI. Other data is available for calibration of data.
+
+The data is presented in FITS format, the standard in astronomy.
+The light curve files contain both the measurement of the electorn flux and also time of the measurement. If the measurement was unavailable, the data is represented with a NaN(Not a Number) value.
+
+Some of the data columns that exist inside the FITS format file of each of the kepler objects are the following.
+
+1. TIME: time is given as Kepler Barycentric Julian Date minus 2454833.0
+	BJD = TIME + BJDREFI(2454833.0)
+2. SAP_FLUX: Given in units of electrons per second.
+3. PDCSAP_FLUX: data of SAP_FLUX after the data was processed in the PDC module. The PDC(Presearch Data Conditioning) module attempts to removes systematic errors from the electron flux data such as pointing drift, focus changes, and thermal transients. Bayesian statistics and Least Squares fitting was used.
+I do not really understand how it works.
+
+The rest of the chapter deals with how the other data inside the kepler archive are formatted.
+
+Chapter 3 deals with how to search and obtain the Kepler data from the Archive.
+Thanks to Dan's kplr python module(http://dan.iel.fm/kplr/) to easily obtain data, the technicalities of this chapter were skipped.
+
+Appendix A is relevant to the project I am working on as it gives short descriptions of the headers given in the light curve data.
