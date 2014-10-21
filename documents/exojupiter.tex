@@ -26,9 +26,7 @@
 \refstepcounter{affil}\label{mpia}\altaffiltext{\ref{mpia}}{%
   Max-Planck-Institut f\"ur Astronomie}
 
-\date{~\hfill
-  DRAFT --- not for distribution --- \texttt{git hash \githash\ (\gitdate)}
-  \hfill~}
+\date{DRAFT --- not ready for distribution --- \texttt{git hash \githash\ (\gitdate)}}
 
 \begin{abstract}
 In the Solar System, gravitational perturbations from Jupiter are
@@ -42,7 +40,7 @@ Here we search the light-curves of dwarf stars in [temperature ranges]
 in the \Kepler\ data for single transits that have roughly the right
 duration and depth to be single transits of long-period gas-giant
 planets.
-We use probabilistic hypothesis tests against alternatives to rule out
+We use hypothesis tests against alternatives to rule out
 instrument-generated artifact false-positives, and probabilistic
 inference to obtain likelihood information about planet radius and
 orbital period.
@@ -55,6 +53,67 @@ We discuss the problem of astrophysical false positives, but the
 conservative position is to treat this measurement as an upper limit.
 \end{abstract}
 
-hello world.
+\section{Introduction}
+
+...The point that Jupiter is in charge in the Solar System
+
+...There are long-period planets known from RV data with very
+uncertain periods and masses.  Cite Knutson here.
+
+...There are single transits known in the \Kepler\ data but no
+published list.  Is that true?
+
+...Why is it worth searching?  Calculation for a world in which every
+star has a perfect Jupiter analog.
+
+\section{Search and Characterization}
+
+Our search for single transits proceeds in three stages.
+First we look for places where the data are better explained by a
+top-hat or square-wave or box downward deviation from a constant level
+is a better explanation of the data.
+This ``box search'' produces ``box candidates''.
+Second we perform a standard hypothesis test between a detailed
+transit model (a full model including limb darkening) and some
+``artifact'' models that attempt to model typical spacecraft-induced
+features seen commonly in the \Kepler\ data.
+The box candidates that pass this hypothesis test are called ``transit
+candidates''.
+Third we perform MCMC sampling with fairly uninformative interim
+priors to obtain posterior (and, indirectly, likelihood) information
+about the transit parameters that explain each of the transit
+candidates.
+This characterization step produces a $K$-element sampling in planet
+radius, period, and impact parameter for each transit candidate.
+
+...Box search
+
+...Hypothesis tests
+
+...Characterization
+
+\section{Population Model}
+
+...This section only needs to be written if we have transit
+candidates!
+
+The information coming from any individual transit candidate, about
+period, say, is extremely small.
+That is, we can't just use the ``central values'' of the likelihood
+functions or posterior pdfs and expect to get good inferences about
+the population of Jupiter-like planets.
+
+The only principled way to use noisy information at the
+individual-object level and nonetheless make inferences...
+
+\section{Discussion}
+
+...Recap
+
+...Assumptions:  List each one and discuss.
+
+...Astrophysical false positives?
+
+...Circular orbits?
 
 \end{document}
