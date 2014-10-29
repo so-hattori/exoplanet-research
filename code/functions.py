@@ -173,7 +173,13 @@ def push_box_model(offset, depth, width, time):
 	return pb_model
 
 #Create a function that generates a model with the optimal depth
-def opt_depth_push_model(data_array, offset, width, time):
+def opt_depth_push_model(data_array, offset, width, time, inverse_variance):
+	depth, depth_variance, ln_like = get_depth_and_ln_like(data_array, offset, width, time, inverse_variance)
+	pb_model = np.ones_like(time) # Create an array of the same size at time and all values initialzed at one.
+	pb_model[transit] -= depth
+	return pb_model
+
+def get_depth_and_ln_like(data_array, offset, width, time, inverse_variance):
 	ll = offset < time + (width/2.0)
 	ul = time < (offset+width/2.0)
 	transit = ll*ul #Boolean array with True at transit times
@@ -181,31 +187,33 @@ def opt_depth_push_model(data_array, offset, width, time):
 	#This will be done by assigning the depth to be the average value
 	#for the values inside the transit window for the data_array.
 	data_in_transit = data_array[transit]
+	inv_var_in_transit = inverse_variance[transit]
 	#I need to ask Hogg or Dan whether it's better to use the average value or the median value.
+	depth_variance = 0
 	if data_in_transit.shape[0] == 0:
 		depth = 0.0
 	else:
 		#If coincedentally the mean inside the window is
 		#larger than 1.0, we need to assign the depth to be 0.
-		value = np.mean(data_in_transit)
+		#value = np.mean(data_in_transit) #Calculate with inverse variance
+		depth_variance = 1.0/np.sum(inv_var_in_transit)
+		value = np.sum(data_in_transit*inv_var_in_transit) * depth_variance
 		if value > 1.0:
 			depth = 0.0
 		else:
 			depth = 1.0 - value
-	#print depth
-	pb_model = np.ones_like(time) # Create an array of the same size at time and all values initialzed at one.
-	pb_model[transit] -= depth
-	return pb_model
+	#Calculate the chi2 when inside the transit window
+	chi2 = (data_in_transit - value)**2 - (data_in_transit-1.0)**2
+	ln_like = -0.5*np.sum(chi2*inv_var_in_transit)
+	return depth, depth_variance, ln_like
+
 
 #median filter
 def median_filter(array, box_width):
 	new_array = np.zeros([array.shape[0]])
 	for i, e in enumerate(array):
-		if i > box_width:
-			box = array[i-box_width : i+box_width]
-			value = np.median(box)
-		else:
-			value = e
+		box = array[max(0, i-box_width) : min(i+box_width, len(array))]
+		value = np.median(box)
 		new_array[i] = value
 	print new_array.shape
 	return new_array
@@ -238,8 +246,8 @@ def raw_injection(period, offset, depth, width, time, flux):
 	return flux
 
 #log likelihood
-def ln_like(data_array, model_array, variance):
-	chi2 = ((data_array - model_array)**2) / (variance)
+def ln_like(data_array, model_array, inv_variance):
+	chi2 = ((data_array - model_array)**2)*(inv_variance)
 	return (-1/2)*np.sum(chi2)
 
 #Create a test function to return a relative ln_like without 

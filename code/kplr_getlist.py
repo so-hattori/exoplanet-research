@@ -38,12 +38,10 @@ ferr = np.concatenate(ferr_list)
 width = 0.8
 
 #Run the search
-ln_like_perfect = np.asarray([functions.ln_like(med_flux, functions.opt_depth_push_model(med_flux, o, width, time), variance) for o in time])
-ln_like_flat = functions.ln_like(med_flux, functions.flat_model(time), variance)
-#Subtract off the ln_like_flat as it is just a constant.
-ln_like_array = ln_like_perfect - ln_like_flat
-# ln_like_array = ln_like_perfect
-# index_maxi_like = np.argmax(ln_like_array)
+main_array = np.asarray([functions.get_depth_and_ln_like(med_flux, o, width, time, 1/variance) for o in time])
+depth_array = main_array[:,0]
+depth_variance_array = main_array[:,1]
+ln_like_array = main_array[:,2]
 
 #Find the peaks of the ln_like array
 index_max_like = np.argmax(ln_like_array)
@@ -95,6 +93,10 @@ sub4.plot(w_time, window_ln_like, '.b')
 sub4.set_xlabel("Days")
 sub4.set_ylabel("Ln_Like")
 sub4.grid()
+
+fig3 = plt.figure()
+sub5 = fig3.add_subplot(211)
+sub5.plot(time, depth_array, '.b', markersize=2)
 
 plt.show()
 
