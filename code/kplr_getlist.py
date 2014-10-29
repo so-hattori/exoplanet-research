@@ -1,10 +1,14 @@
 import kplr
-import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.rcParams['axes.formatter.useoffset']=False
+mpl.rcParams['figure.figsize'] = 12,9
+# import matplotlib.pyplot as plt
+plt = mpl.pyplot
 import numpy as np
 import functions
 client = kplr.API()
 
-star = client.star(8813698)
+star = client.star(8800954)
 
 lcs = star.get_light_curves(short_cadence=False)
 
@@ -48,9 +52,6 @@ print time_at_like_max
 lt = time < (time_at_like_max+width)
 ut = (time_at_like_max-width) < time
 
-#Create a plot with fixed window
-# lt = time < 493.5
-# ut = 492. < time
 window_time = lt*ut
 w_time = time[window_time]
 window_flux = med_flux[window_time]

@@ -1,10 +1,14 @@
 import kplr
-import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.rcParams['axes.formatter.useoffset']=False
+mpl.rcParams['figure.figsize'] = 12,9
+# import matplotlib.pyplot as plt
+plt = mpl.pyplot
 import numpy as np
 import functions
 client = kplr.API()
 
-star = client.star(8800954)
+star = client.star(2162635)
 
 lcs = star.get_light_curves(short_cadence=False)
 
@@ -31,7 +35,7 @@ variance = np.concatenate(var_list)
 ferr = np.concatenate(ferr_list)
 
 #depth = 0.003
-width = 0.8
+width = 1.1
 
 #Run the search
 ln_like_perfect = np.asarray([functions.ln_like(med_flux, functions.opt_depth_push_model(med_flux, o, width, time), variance) for o in time])
@@ -48,9 +52,6 @@ print time_at_like_max
 lt = time < (time_at_like_max+width)
 ut = (time_at_like_max-width) < time
 
-#Create a plot with fixed window
-# lt = time < 493.5
-# ut = 492. < time
 window_time = lt*ut
 w_time = time[window_time]
 window_flux = med_flux[window_time]
