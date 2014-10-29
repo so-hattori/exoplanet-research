@@ -5,6 +5,42 @@ import os
 import pyfits
 import kplr
 
+#Function to return multiple arrays of the required values.
+#The input is the ID of the star and also the size of the 
+#median filtering.
+def return_arrays(kplr_id, filter_size):
+	client = kplr.API()
+	star = client.star(kplr_id)
+	lcs = star.get_light_curves(short_cadence=False)
+	#Figure out the number of data sets so that the size of the
+	#array can be set.
+	size = len(lcs)
+	time_array = np.zeros(size)
+	flux_array = np.zeros(size)
+	ferr_array = np.zeros(size)
+	var_array = np.zeros(size)
+	med_flux_array = np.zeros(size)
+	#To use in indexing the array
+	i = 0
+	for lc in lcs:
+		with lc.open() as f:
+			hdu_data = f[1].data
+			time, flux, ferr = fix_data(hdu_data)
+			time_array[i] = time
+			flux_array[i] = flux
+			median = median_filter(flux, filter_size)
+			ferr_array[i] = ferr/median
+			var_array[i] = (ferr/median)**2
+			med_flux_array[i] = flux/median
+		i += 1
+	time = np.concatenate(time_array)
+	flux = np.concatenate(flux_array)
+	med_flux = np.concatenate(med_flux_array)
+	variance = np.concatenate(var_array)
+	ferr = np.concatenate(ferr_array)
+	return time, flux, med_flux, variance, ferr
+
+
 #function to open the FITS format file given kepler id and filename.
 def openfile(kplr_id, kplr_file):
 	path = '/Users/SHattori/.kplr/data/lightcurves/%s' %kplr_id
@@ -136,6 +172,31 @@ def push_box_model(offset, depth, width, time):
 	pb_model[transit] -= depth
 	return pb_model
 
+#Create a function that generates a model with the optimal depth
+def opt_depth_push_model(data_array, offset, width, time):
+	ll = offset < time + (width/2.0)
+	ul = time < (offset+width/2.0)
+	transit = ll*ul #Boolean array with True at transit times
+	#We need to find the optimal depth from the above information.
+	#This will be done by assigning the depth to be the average value
+	#for the values inside the transit window for the data_array.
+	data_in_transit = data_array[transit]
+	#I need to ask Hogg or Dan whether it's better to use the average value or the median value.
+	if data_in_transit.shape[0] == 0:
+		depth = 0.0
+	else:
+		#If coincedentally the mean inside the window is
+		#larger than 1.0, we need to assign the depth to be 0.
+		value = np.mean(data_in_transit)
+		if value > 1.0:
+			depth = 0.0
+		else:
+			depth = 1.0 - value
+	#print depth
+	pb_model = np.ones_like(time) # Create an array of the same size at time and all values initialzed at one.
+	pb_model[transit] -= depth
+	return pb_model
+
 #median filter
 def median_filter(array, box_width):
 	new_array = np.zeros([array.shape[0]])
@@ -178,7 +239,7 @@ def raw_injection(period, offset, depth, width, time, flux):
 
 #log likelihood
 def ln_like(data_array, model_array, variance):
-	chi2 = ((data_array - model_array)**2) / (variance) 
+	chi2 = ((data_array - model_array)**2) / (variance)
 	return (-1/2)*np.sum(chi2)
 
 #Create a test function to return a relative ln_like without 
