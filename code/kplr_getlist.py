@@ -9,7 +9,7 @@ import functions
 import time as timer
 client = kplr.API()
 
-star = client.star(2162635)
+star = client.star(3644071)
 width = 1.1
 
 lcs = star.get_light_curves(short_cadence=False)
@@ -37,12 +37,11 @@ med_flux = np.concatenate(med_flux_list)
 variance = np.concatenate(var_list)
 ferr = np.concatenate(ferr_list)
 
-# time, flux, med_flux, variance, ferr = functions.return_arrays(2162635, 80)
 width = 1.1
 print "Loading data", timer.time() - start_time
 
 #Run the search
-#time_grid makes the time array coarser. This will allow the number of searches to
+#time_grid makes the time array coarse. This will allow the number of searches to
 #be much less than doing the calculations at all times.
 time_grid = np.arange(min(time), max(time), width/10)
 print time.shape, time_grid.shape
@@ -74,15 +73,6 @@ window_ln_like = ln_like_array[window_time]
 
 
 fig1 = plt.figure()
-# sub1 = fig1.add_subplot(211)
-# sub1.plot(time, flux, ',k')
-# sub1.set_xlabel("Days")
-# sub1.set_ylabel("Raw Flux")
-
-# sub2 = fig1.add_subplot(212)
-# sub2.plot(time, med_flux, ',k')
-# sub2.set_xlabel("Days")
-# sub2.set_ylabel("Median-filtered Flux")
 
 sub1 = fig1.add_subplot(211)
 sub1.plot(time, med_flux, '.k', markersize = 2)

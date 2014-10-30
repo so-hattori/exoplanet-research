@@ -136,14 +136,3 @@ def raw_injection(period, offset, depth, width, time, flux):
 def ln_like(data_array, model_array, inv_variance):
 	chi2 = ((data_array - model_array)**2)*(inv_variance)
 	return (-1/2)*np.sum(chi2)
-
-#generate vertical lines
-def vertical_lines(inj_period, time, plot_designation, inj_width, ylim_limits):
-	integers = np.arange(-5,5,1)
-	inj_times = integers * inj_period
-	low_limit_time = inj_times > time.min()
-	high_limit_time = inj_times < time.max()
-	time_limits = low_limit_time * high_limit_time
-	inj_times = inj_times[time_limits]
-	for i in inj_times:
-		plot_designation.vlines(i+(inj_width/2), ylim_limits[0], ylim_limits[-1], 'r')
