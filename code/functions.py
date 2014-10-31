@@ -4,6 +4,8 @@ import numpy as np
 import os
 import pyfits
 import kplr
+import copy
+import matplotlib.pyplot as plt
 
 #Function to return multiple arrays of the required values.
 #The input is the ID of the star and also the size of the 
@@ -94,6 +96,18 @@ def get_depth_and_ln_like(data_array, offset, width, time, inverse_variance):
 	ln_like = -0.5*np.sum(chi2*inv_var_in_transit)
 	return depth, depth_variance, ln_like
 
+#Return the transit boolean
+def get_transit_boolean(offset, width, complete_time):
+	ll = offset < complete_time+width/2.0
+	ul = complete_time < (offset+width/2.0)
+	return ll*ul
+
+#Return a model given the depth, transit_window, and complete_time
+def return_model(depth, transit_window, complete_time):
+	model = np.ones(len(complete_time))
+	model[transit_window] -= depth
+	return model
+
 
 #median filter
 def median_filter(array, box_width):
@@ -104,22 +118,6 @@ def median_filter(array, box_width):
 		new_array[i] = value
 	print new_array.shape
 	return new_array
-
-#moving average filter
-def ma_filter(array, box_width):
-	new_array = np.zeros([array.shape[0]])
-	for i, e in enumerate(array):
-		if i > box_width:
-			box = array[i-box_width : i+box_width]
-			value = np.sum(box) / box.shape[0]
-		else:
-			value = e
-		new_array[i] = value
-	return new_array
-
-
-def flat_model(time):
-	return np.ones_like(time)
 
 #injection function
 def injection(period, offset, depth, width, time, flux):
@@ -136,3 +134,89 @@ def raw_injection(period, offset, depth, width, time, flux):
 def ln_like(data_array, model_array, inv_variance):
 	chi2 = ((data_array - model_array)**2)*(inv_variance)
 	return (-1/2)*np.sum(chi2)
+
+#Function to return the window of peaks.
+#For now, this will be trivially implemented by
+#finding the peaks in the likelihood array, removing that window of data points
+#from the array, and repeating the process.
+#The inputs are the ln_likelihood array, complete time array,time_grid array, 
+#the width of the window, and the number of peaks to find.
+#The output should be a list containing the "transit window" boolean arrays, and the peaks. 
+def peak_finder(likelihood_array, complete_time_array, time_grid_array, width, number_peaks):
+	complete_time_list_of_boolean_arrays = [0]*number_peaks
+	time_grid_list_of_boolean_arrays = [0]*number_peaks
+	peaks = np.zeros(number_peaks)
+	peak_index = np.zeros(number_peaks)
+	#Create a deepcopy of the likelihood array.
+	copy_likelihood_array = copy.copy(likelihood_array)
+	for i in xrange(number_peaks):
+		index_of_max_likelihood = np.argmax(copy_likelihood_array)
+		time_at_max_likelihood = time_grid_array[index_of_max_likelihood]
+		#Just for sake, let's store the peak values in an array.
+		peaks[i] = time_at_max_likelihood
+		peak_index[i] = index_of_max_likelihood
+		#Since the two lines above will find the peak in the likelihood array,
+		#We now need to find the corresponding time windows for both the 
+		#complete time array, and also the coarse time_grid array.
+		complete_time_lower_end = complete_time_array < (time_at_max_likelihood+width)
+		complete_time_upper_end = (time_at_max_likelihood-width) < complete_time_array
+		complete_time_transit_boolean = complete_time_lower_end*complete_time_upper_end
+		# complete_time_transit_window = complete_time_array[complete_time_transit_window]
+		complete_time_list_of_boolean_arrays[i] = complete_time_transit_boolean
+
+		time_grid_lower_end = time_grid_array < (time_at_max_likelihood+width)
+		time_grid_upper_end = (time_at_max_likelihood-width) < time_grid_array
+		time_grid_transit_boolean = time_grid_lower_end*time_grid_upper_end
+		# time_grid_transit_window = time_grid_array[time_grid_transit_boolean]
+		time_grid_list_of_boolean_arrays[i] = time_grid_transit_boolean
+
+		#Now we need to modify the likelihood array so that the interval around the previously
+		#found peaks are NOT found again.
+		#A trivial implementation of this (possible need to modify later)
+		#can be easily done by setting all the values found inside the "transit window"
+		#to be 0.
+		copy_likelihood_array[time_grid_transit_boolean] = 0
+
+	return complete_time_list_of_boolean_arrays, time_grid_list_of_boolean_arrays, peaks, peak_index
+
+#Function to graph the peaks
+def plot_peaks(complete_boolean_list, grid_boolean_list, time, med_flux, ferr, time_grid, ln_like_array, depth_array, transit_boolean_array, peak_index, pp):
+	for i in xrange(len(complete_boolean_list)):
+		transit_complete_time = time[complete_boolean_list[i]]
+		transit_flux = med_flux[complete_boolean_list[i]]
+		transit_error = ferr[complete_boolean_list[i]]
+
+		transit_grid_time = time_grid[grid_boolean_list[i]]
+		transit_likelihood = ln_like_array[grid_boolean_list[i]]
+		x_lims= [transit_grid_time[0], transit_grid_time[-1]]
+
+		best_depth = depth_array[peak_index[i]]
+		print best_depth
+		best_transit_window = transit_boolean_array[peak_index[i]]
+		best_model = return_model(best_depth, best_transit_window, time)
+		window_best_model = best_model[complete_boolean_list[i]]
+
+		fig = plt.figure()
+		graph_flux = fig.add_subplot(211)
+		graph_flux.errorbar(transit_complete_time, transit_flux, yerr=transit_error, fmt = '.')
+		graph_flux.plot(transit_complete_time, window_best_model, 'r')		
+		graph_flux.set_xlabel("Days")
+		graph_flux.set_ylabel("Median-filtered Flux")
+		graph_flux.set_title("Peak: {0}".format(i+1))
+		graph_flux.set_xlim(x_lims)
+		graph_flux.grid()
+		graph_flux.locator_params(axis = 'x', nbins = 8)
+
+		graph_like = fig.add_subplot(212)
+		graph_like.plot(transit_grid_time, transit_likelihood, '.b')
+		graph_like.set_xlabel("Days")
+		graph_like.set_ylabel("Ln_Likelihood")
+		graph_like.set_xlim(x_lims)
+		graph_like.grid()
+		graph_like.locator_params(axis = 'x', nbins = 8)
+		pp.savefig()
+
+
+
+
+	

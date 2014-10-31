@@ -1,16 +1,18 @@
 import kplr
 import matplotlib as mpl
 mpl.rcParams['axes.formatter.useoffset']=False
-mpl.rcParams['figure.figsize'] = 12,9
+mpl.rcParams['figure.figsize'] = 13.5,9
 # import matplotlib.pyplot as plt
 plt = mpl.pyplot
 import numpy as np
 import functions
 import time as timer
+from matplotlib.backends.backend_pdf import PdfPages
 client = kplr.API()
 
-star = client.star(3644071)
-width = 1.1
+kplr_id = 2162635
+star = client.star(kplr_id)
+width = 0.5
 
 lcs = star.get_light_curves(short_cadence=False)
 
@@ -37,41 +39,31 @@ med_flux = np.concatenate(med_flux_list)
 variance = np.concatenate(var_list)
 ferr = np.concatenate(ferr_list)
 
-width = 1.1
 print "Loading data", timer.time() - start_time
 
 #Run the search
 #time_grid makes the time array coarse. This will allow the number of searches to
 #be much less than doing the calculations at all times.
-time_grid = np.arange(min(time), max(time), width/10)
+time_grid = np.arange(min(time), max(time), width/8)
 print time.shape, time_grid.shape
 start_time = timer.time()
-main_array = np.asarray([functions.get_depth_and_ln_like(med_flux, o, width, time, 1/variance) for o in time_grid])
+# main_array = np.asarray([functions.get_depth_and_ln_like(med_flux, o, width, time, 1/variance) for o in time_grid])
+main_array = np.array([functions.get_depth_and_ln_like(med_flux, o, width, time, 1/variance) for o in time_grid])
+transit_boolean_array = np.array([functions.get_transit_boolean(o, width, time) for o in time_grid])
 print "Search time", timer.time() - start_time
 depth_array = main_array[:,0]
 depth_variance_array = main_array[:,1]
 ln_like_array = main_array[:,2]
 
-#Find the peaks of the ln_like array
-index_max_like = np.argmax(ln_like_array)
-time_at_like_max = time_grid[index_max_like]
-print time_at_like_max
-lt = time < (time_at_like_max+width)
-ut = (time_at_like_max-width) < time
-window_time = lt*ut
-w_time = time[window_time]
-window_flux = med_flux[window_time]
-window_error = ferr[window_time]
+#Use the peak_finder function to obtain the boolean arrays used to
+#get the required "transit window" values.
+start_time = timer.time()
+complete_boolean_list, grid_boolean_list, peaks, peak_index = functions.peak_finder(ln_like_array, time, time_grid, width, 5)
+print "Peak finding time", timer.time() - start_time
+print peaks
+print peak_index
 
-
-lt = time_grid < (time_at_like_max+width)
-ut = (time_at_like_max-width) < time_grid
-window_time = lt*ut
-w_time_grid = time_grid[window_time]
-
-window_ln_like = ln_like_array[window_time]
-
-
+pp = PdfPages('../plots/{0}_width_{1}.pdf'.format(kplr_id, width))
 fig1 = plt.figure()
 
 sub1 = fig1.add_subplot(211)
@@ -86,26 +78,18 @@ sub2.set_xlabel("Days")
 sub2.set_ylabel("Ln Likelihood")
 sub2.grid()
 
-fig2 = plt.figure()
-sub3 = fig2.add_subplot(211)
-# sub3.plot(time, med_flux, '.k')
-sub3.errorbar(w_time, window_flux, yerr=window_error, fmt = '.')
-sub3.set_xlabel("Days")
-sub3.set_ylabel("Median-filtered Flux")
-sub3.set_xlim([time_at_like_max-width, time_at_like_max+width])
-sub3.grid()
-
-sub4 = fig2.add_subplot(212)
-# sub4.plot(time, ln_like_array, '.b')
-sub4.plot(w_time_grid, window_ln_like, '.b')
-sub4.set_xlabel("Days")
-sub4.set_ylabel("Ln_Like")
-sub4.set_xlim([time_at_like_max-width, time_at_like_max+width])
-sub4.grid()
+pp.savefig()
+#Plot the peaks and their likelihoods.
+functions.plot_peaks(complete_boolean_list, grid_boolean_list, time, med_flux, ferr, time_grid, ln_like_array, depth_array, transit_boolean_array, peak_index, pp)
 
 fig3 = plt.figure()
-sub5 = fig3.add_subplot(211)
+sub5 = fig3.add_subplot(111)
 sub5.plot(time_grid, depth_array, '.b', markersize=2)
+sub5.set_xlabel("Days")
+sub5.set_ylabel("Depth")
+sub5.grid()
 
-plt.show()
+pp.savefig()
+pp.close()
+
 
