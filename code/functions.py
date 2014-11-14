@@ -88,6 +88,9 @@ def get_depth_and_ln_like(data_array, offset, width, time, inverse_variance):
 		depth_variance = 1.0/np.sum(inv_var_in_transit)
 		value = np.sum(data_in_transit*inv_var_in_transit) * depth_variance
 		if value > 1.0:
+			'''Consult Hogg if this is the proper fix'''
+			value = 1.0
+			''''''
 			depth = 0.0
 		else:
 			depth = 1.0 - value
@@ -119,21 +122,21 @@ def median_filter(array, box_width):
 	print new_array.shape
 	return new_array
 
-#injection function
-def injection(period, offset, depth, width, time, flux):
-	in_transit = (time - offset) % period < width
-	flux[in_transit] -= depth
-	return flux
+# #injection function
+# def injection(period, offset, depth, width, time, flux):
+# 	in_transit = (time - offset) % period < width
+# 	flux[in_transit] -= depth
+# 	return flux
 
-def raw_injection(period, offset, depth, width, time, flux):
-	in_transit = (time - offset) % period < width
-	flux[in_transit] = flux[in_transit] * (1-depth)
-	return flux
+# def raw_injection(period, offset, depth, width, time, flux):
+# 	in_transit = (time - offset) % period < width
+# 	flux[in_transit] = flux[in_transit] * (1-depth)
+# 	return flux
 
-#log likelihood
-def ln_like(data_array, model_array, inv_variance):
-	chi2 = ((data_array - model_array)**2)*(inv_variance)
-	return (-1/2)*np.sum(chi2)
+# #log likelihood
+# def ln_like(data_array, model_array, inv_variance):
+# 	chi2 = ((data_array - model_array)**2)*(inv_variance)
+# 	return (-1/2)*np.sum(chi2)
 
 #Function to return the window of peaks.
 #For now, this will be trivially implemented by
@@ -175,6 +178,9 @@ def peak_finder(likelihood_array, complete_time_array, time_grid_array, width, n
 		#A trivial implementation of this (possible need to modify later)
 		#can be easily done by setting all the values found inside the "transit window"
 		#to be 0.
+		#There is a huge problem with using this trivial method for small widths.
+		#The problem is that there is still a chance that the second best peak is still
+		#within the area around the largest transit dip.
 		copy_likelihood_array[time_grid_transit_boolean] = 0
 
 	return complete_time_list_of_boolean_arrays, time_grid_list_of_boolean_arrays, peaks, peak_index
@@ -182,6 +188,7 @@ def peak_finder(likelihood_array, complete_time_array, time_grid_array, width, n
 #Function to graph the peaks
 def plot_peaks(complete_boolean_list, grid_boolean_list, time, med_flux, ferr, time_grid, ln_like_array, depth_array, transit_boolean_array, peak_index, pp):
 	for i in xrange(len(complete_boolean_list)):
+		print i
 		transit_complete_time = time[complete_boolean_list[i]]
 		transit_flux = med_flux[complete_boolean_list[i]]
 		transit_error = ferr[complete_boolean_list[i]]
@@ -216,7 +223,29 @@ def plot_peaks(complete_boolean_list, grid_boolean_list, time, med_flux, ferr, t
 		graph_like.locator_params(axis = 'x', nbins = 8)
 		pp.savefig()
 
+def find_nearest_index(array, value):
+	idx = (np.abs(array-value)).argmin()
+	return idx
 
+def mid_points(complete_time_array, width):
+	midpoint = (1208.35176444 + 144.10176444)/2
+	mid_index = find_nearest_index(complete_time_array, midpoint)
 
+	mid_complete_time_value = complete_time_array[mid_index]
 
-	
+	complete_time_lower_end = complete_time_array < (mid_complete_time_value+10*width)
+	complete_time_upper_end = (mid_complete_time_value-10*width) < complete_time_array
+	complete_time_mid_boolean = complete_time_lower_end*complete_time_upper_end
+
+	return complete_time_mid_boolean
+
+def plot_midpoint(complete_time_mid_boolean, time, med_flux, ferr, pp):
+		mid_complete_time = time[complete_time_mid_boolean]
+		mid_flux = med_flux[complete_time_mid_boolean]
+		mid_error = ferr[complete_time_mid_boolean]
+
+		fig = plt.figure()
+		sub = fig.add_subplot(111)
+		sub.errorbar(mid_complete_time, mid_flux, yerr=mid_error, fmt = '.')
+		sub.grid()
+		pp.savefig()
