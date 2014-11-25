@@ -64,7 +64,7 @@ def main(kplr_id):
     print peaks
     print peak_index
 
-    pp = PdfPages('../plots/{0}_width_{1}.pickle'.format(kplr_id, width))
+    pp = PdfPages('../plots/{0}_width_{1}.pdf'.format(kplr_id, width))
     fig1 = plt.figure()
 
     sub1 = fig1.add_subplot(211)
@@ -101,7 +101,7 @@ def main(kplr_id):
     pp.close()
     plt.close('all')
 
-list_ids = [3644071,8813698,8891318,11465813,10287723,2162635,9214713,12356617,7672940,3239945,2306756,3962440,880945,3230491,736829,11342550,104640629,11709124,8505215,3756801]
+# list_ids = [3644071,8813698,8891318,11465813,10287723,2162635,9214713,12356617,7672940,3239945,2306756,3962440,880945,3230491,736829,11342550,104640629,11709124,8505215,3756801]
 # list_ids = [8813697]
 start_time = timer.time()
 for i in list_ids:

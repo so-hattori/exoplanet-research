@@ -145,50 +145,56 @@ def median_filter(array, box_width):
 #The inputs are the ln_likelihood array, complete time array,time_grid array, 
 #the width of the window, and the number of peaks to find.
 #The output should be a list containing the "transit window" boolean arrays, and the peaks. 
-def peak_finder(likelihood_array, complete_time_array, time_grid_array, width, number_peaks):
-	complete_time_list_of_boolean_arrays = [0]*number_peaks
-	time_grid_list_of_boolean_arrays = [0]*number_peaks
-	peaks = np.zeros(number_peaks)
-	peak_index = np.zeros(number_peaks)
+def peak_finder(likelihood_array, complete_time_array, time_grid_array, width, depth_array):
+	complete_time_list_of_boolean_arrays = []
+	time_grid_list_of_boolean_arrays = []
+	peaks = []
+	peak_index = []
+	tol_depth = 10.0**(-3)
 	#Create a deepcopy of the likelihood array.
 	copy_likelihood_array = copy.copy(likelihood_array)
-	for i in xrange(number_peaks):
+	while True:
 		index_of_max_likelihood = np.argmax(copy_likelihood_array)
-		time_at_max_likelihood = time_grid_array[index_of_max_likelihood]
-		#Just for sake, let's store the peak values in an array.
-		peaks[i] = time_at_max_likelihood
-		peak_index[i] = index_of_max_likelihood
-		#Since the two lines above will find the peak in the likelihood array,
-		#We now need to find the corresponding time windows for both the 
-		#complete time array, and also the coarse time_grid array.
-		complete_time_lower_end = complete_time_array < (time_at_max_likelihood+width)
-		complete_time_upper_end = (time_at_max_likelihood-width) < complete_time_array
-		complete_time_transit_boolean = complete_time_lower_end*complete_time_upper_end
-		# complete_time_transit_window = complete_time_array[complete_time_transit_window]
-		complete_time_list_of_boolean_arrays[i] = complete_time_transit_boolean
+		#Suppress the rest of the code if the depth is too small (d < (10^-3)) THIS MAY BE CHANGED LATER.
+		if (depth_array[index_of_max_likelihood] < tol_depth):
+			# print "DEPTH IS TOO SMALL"
+			break
+		else:
+			time_at_max_likelihood = time_grid_array[index_of_max_likelihood]
+			#Just for sake, let's store the peak values in an array.
+			peaks.append(time_at_max_likelihood)
+			peak_index.append(index_of_max_likelihood)
+			#Since the two lines above will find the peak in the likelihood array,
+			#We now need to find the corresponding time windows for both the 
+			#complete time array, and also the coarse time_grid array.
+			complete_time_lower_end = complete_time_array < (time_at_max_likelihood+width)
+			complete_time_upper_end = (time_at_max_likelihood-width) < complete_time_array
+			complete_time_transit_boolean = complete_time_lower_end*complete_time_upper_end
+			# complete_time_transit_window = complete_time_array[complete_time_transit_window]
+			complete_time_list_of_boolean_arrays.append(complete_time_transit_boolean)
 
-		time_grid_lower_end = time_grid_array < (time_at_max_likelihood+width)
-		time_grid_upper_end = (time_at_max_likelihood-width) < time_grid_array
-		time_grid_transit_boolean = time_grid_lower_end*time_grid_upper_end
-		# time_grid_transit_window = time_grid_array[time_grid_transit_boolean]
-		time_grid_list_of_boolean_arrays[i] = time_grid_transit_boolean
+			time_grid_lower_end = time_grid_array < (time_at_max_likelihood+width)
+			time_grid_upper_end = (time_at_max_likelihood-width) < time_grid_array
+			time_grid_transit_boolean = time_grid_lower_end*time_grid_upper_end
+			# time_grid_transit_window = time_grid_array[time_grid_transit_boolean]
+			time_grid_list_of_boolean_arrays.append(time_grid_transit_boolean)
 
-		#Now we need to modify the likelihood array so that the interval around the previously
-		#found peaks are NOT found again.
-		#A trivial implementation of this (possible need to modify later)
-		#can be easily done by setting all the values found inside the "transit window"
-		#to be 0.
-		#There is a huge problem with using this trivial method for small widths.
-		#The problem is that there is still a chance that the second best peak is still
-		#within the area around the largest transit dip.
-		copy_likelihood_array[time_grid_transit_boolean] = 0
+			#Now we need to modify the likelihood array so that the interval around the previously
+			#found peaks are NOT found again.
+			#A trivial implementation of this (possible need to modify later)
+			#can be easily done by setting all the values found inside the "transit window"
+			#to be 0.
+			#There is a huge problem with using this trivial method for small widths.
+			#The problem is that there is still a chance that the second best peak is still
+			#within the area around the largest transit dip.
+			copy_likelihood_array[time_grid_transit_boolean] = 0
 
-	return complete_time_list_of_boolean_arrays, time_grid_list_of_boolean_arrays, peaks, peak_index
+	return np.array(complete_time_list_of_boolean_arrays), np.array(time_grid_list_of_boolean_arrays), peaks, peak_index
 
 #Function to graph the peaks
 def plot_peaks(complete_boolean_list, grid_boolean_list, time, med_flux, ferr, time_grid, ln_like_array, depth_array, transit_boolean_array, peak_index, pp):
 	for i in xrange(len(complete_boolean_list)):
-		print i
+		# print i
 		transit_complete_time = time[complete_boolean_list[i]]
 		transit_flux = med_flux[complete_boolean_list[i]]
 		transit_error = ferr[complete_boolean_list[i]]
@@ -198,7 +204,7 @@ def plot_peaks(complete_boolean_list, grid_boolean_list, time, med_flux, ferr, t
 		x_lims= [transit_grid_time[0], transit_grid_time[-1]]
 
 		best_depth = depth_array[peak_index[i]]
-		print best_depth
+		# print best_depth
 		best_transit_window = transit_boolean_array[peak_index[i]]
 		best_model = return_model(best_depth, best_transit_window, time)
 		window_best_model = best_model[complete_boolean_list[i]]
@@ -227,8 +233,8 @@ def find_nearest_index(array, value):
 	idx = (np.abs(array-value)).argmin()
 	return idx
 
-def mid_points(complete_time_array, width):
-	midpoint = (1208.35176444 + 144.10176444)/2
+def mid_points(complete_time_array, width, peaks):
+	midpoint = (peaks[0]+peaks[1])/2
 	mid_index = find_nearest_index(complete_time_array, midpoint)
 
 	mid_complete_time_value = complete_time_array[mid_index]
@@ -237,15 +243,19 @@ def mid_points(complete_time_array, width):
 	complete_time_upper_end = (mid_complete_time_value-10*width) < complete_time_array
 	complete_time_mid_boolean = complete_time_lower_end*complete_time_upper_end
 
-	return complete_time_mid_boolean
+	return complete_time_mid_boolean, midpoint
 
-def plot_midpoint(complete_time_mid_boolean, time, med_flux, ferr, pp):
+def plot_midpoint(complete_time_mid_boolean, time, med_flux, ferr, pp, midpoint):
 		mid_complete_time = time[complete_time_mid_boolean]
 		mid_flux = med_flux[complete_time_mid_boolean]
 		mid_error = ferr[complete_time_mid_boolean]
 
 		fig = plt.figure()
 		sub = fig.add_subplot(111)
-		sub.errorbar(mid_complete_time, mid_flux, yerr=mid_error, fmt = '.')
+		sub.errorbar(mid_complete_time, mid_flux, yerr=mid_error, fmt = '.', alpha=0.7)
+		sub.vlines(midpoint,mid_flux.min(), mid_flux.max(),linewidth=1, color='r')
+		sub.set_xlabel("Day")
+		sub.set_ylabel("Median-Filtered Flux")
+		sub.set_title("Possbile Occultation(Flux around midpoint between 2 transit events.)")
 		sub.grid()
 		pp.savefig()
