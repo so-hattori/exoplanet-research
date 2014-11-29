@@ -2,7 +2,6 @@
 
 import numpy as np
 import os
-import pyfits
 import kplr
 import copy
 import matplotlib.pyplot as plt
