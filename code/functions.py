@@ -145,15 +145,17 @@ def median_filter(array, box_width):
 #The inputs are the ln_likelihood array, complete time array,time_grid array, 
 #the width of the window, and the number of peaks to find.
 #The output should be a list containing the "transit window" boolean arrays, and the peaks. 
-def peak_finder(likelihood_array, complete_time_array, time_grid_array, width, depth_array):
+def peak_finder(likelihood_array, complete_time_array, time_grid_array, width, depth_array, num_peaks):
 	complete_time_list_of_boolean_arrays = []
 	time_grid_list_of_boolean_arrays = []
 	peaks = []
 	peak_index = []
 	tol_depth = 10.0**(-3)
+	limit_number = 0
 	#Create a deepcopy of the likelihood array.
 	copy_likelihood_array = copy.copy(likelihood_array)
-	while True:
+	while True and (limit_number<num_peaks):
+		limit_number += 1
 		index_of_max_likelihood = np.argmax(copy_likelihood_array)
 		#Suppress the rest of the code if the depth is too small (d < (10^-3)) THIS MAY BE CHANGED LATER.
 		if (depth_array[index_of_max_likelihood] < tol_depth):
@@ -234,7 +236,7 @@ def find_nearest_index(array, value):
 	return idx
 
 def mid_points(complete_time_array, width, peaks):
-	midpoint = (peaks[0]+peaks[1])/2
+	midpoint = (peaks[0]+peaks[1])/2.0
 	mid_index = find_nearest_index(complete_time_array, midpoint)
 
 	mid_complete_time_value = complete_time_array[mid_index]

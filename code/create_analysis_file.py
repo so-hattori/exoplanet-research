@@ -49,7 +49,9 @@ def main(kplr_id, width):
     ln_like_array = main_array[:,2]
 
     ###OPEN, WRITE, CLOSE DATA TO FILE###
-    file_name = '../picklefiles/{0}_width_{1}.hdf5'.format(kplr_id, width)
+    # file_name = '../picklefiles/{0}_width_{1}.hdf5'.format(kplr_id, width)
+    file_name = '../automatically_created_files/{0}_width_{1}.hdf5'.format(kplr_id, width)
+
     f = h5py.File(file_name, 'w')
     f.create_dataset("time", data=time)
     f.create_dataset("med_flux", data=med_flux)
@@ -65,44 +67,36 @@ def main(kplr_id, width):
     # assert 0
 
     f.close()
-    # np.save(write_file, time)
-    # np.save(write_file, med_flux)
-    # np.save(write_file, inv_var)
-    # np.save(write_file, ferr)
-    # np.save(write_file, time_grid)
-    # np.save(write_file, transit_boolean_array)
-    # np.save(write_file, depth_array)
-    # np.save(write_file, depth_variance_array)
-    # np.save(write_file, ln_like_array)
-
-    # time.save(write_file)
-    # med_flux.save(write_file)
-    # inv_var.save(write_file)
-    # ferr.save(write_file)
-    # time_grid.save(write_file)
-    # transit_boolean_array.save(write_file)
-    # depth_array.save(write_file)
-    # depth_variance_array.save(write_file)
-    # ln_like_array.save(write_file)
 
 # list_ids = [3644071,8813698,8891318,11465813,10287723,2162635,9214713,12356617,7672940,3239945,2306756,3962440,880945,3230491,736829,11342550,104640629,11709124,8505215,3756801]
 list_ids = [7672940]
 # list_ids = [3756801]
 # list_ids = [11465813]
 # list_ids=[892977]
-
 # list_ids = [757076]
-width = 0.5
+
+width = 1.0
 start_time = timer.time()
+
 client = kplr.API()
-# stars = client.stars(kic_kepler_id = "10000612..13161029", max_records = 500)
-# assert 0
-for i in list_ids:
-    print "Kepler ID: ", i
-    try:
-        main(i, width)
-    except ValueError:
-        print "Error for ID: ", i
+# lcs = client.light_curves(sci_data_quarter=5, max_records=20, order='ktc_kepler_id')
+# id_list = [l.ktc_kepler_id for l in lcs]
+
+# for kplr_id in id_list:
+#     print "Kepler ID: ", kplr_id
+#     try:
+#         with open('used_id_list.txt', 'a') as text_file:
+#             text_file.write("%s\n" % kplr_id)
+#         main(kplr_id, width)
+#     except ValueError:
+#         with open('id_error_log.txt', 'a') as error_file:
+#             error_file.write("%s\n" % kplr_id)
+#         print "Error for ID: ", kplr_id
+
+###Single star analysis with a known kplr id
+main(892667, 0.8)
+
+
 print timer.time() - start_time
 
 
